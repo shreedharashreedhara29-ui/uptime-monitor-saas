@@ -69,6 +69,19 @@
             border-radius: 9999px;
             letter-spacing: 0.5px;
         }
+        .btn-upgrade {
+            background-color: #4f46e5;
+            color: #ffffff;
+            text-decoration: none;
+            padding: 5px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 700;
+            transition: background 0.2s;
+        }
+        .btn-upgrade:hover {
+            background-color: #4338ca;
+        }
         .btn-logout {
             background-color: #fee2e2;
             color: var(--danger);
@@ -226,6 +239,7 @@
             <div class="user-info">
                 <span><%= user.email %></span>
                 <span class="plan-badge"><%= user.plan ? user.plan + ' PLAN' : 'FREE PLAN' %></span>
+                <a href="/upgrade" class="btn-upgrade">⚡ Upgrade</a>
                 <a href="/logout" class="btn-logout">Logout</a>
             </div>
         </div>
