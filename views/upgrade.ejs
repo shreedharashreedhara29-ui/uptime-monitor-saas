@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upgrade to Pro - Uptime Monitor</title>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #0f172a;
+            --border: #e2e8f0;
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .pricing-card {
+            background: var(--card-bg);
+            border: 2px solid var(--primary);
+            border-radius: 16px;
+            padding: 40px;
+            max-width: 420px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(79, 70, 229, 0.1);
+        }
+        .badge {
+            background: #e0e7ff;
+            color: var(--primary);
+            padding: 6px 14px;
+            border-radius: 9999px;
+            font-size: 13px;
+            font-weight: 700;
+            display: inline-block;
+            margin-bottom: 16px;
+        }
+        .price {
+            font-size: 42px;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+        .price span {
+            font-size: 16px;
+            color: #64748b;
+            font-weight: 500;
+        }
+        .features {
+            list-style: none;
+            text-align: left;
+            margin: 28px 0;
+        }
+        .features li {
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .features li:last-child {
+            border-bottom: none;
+        }
+        .btn-upgrade {
+            display: block;
+            background-color: var(--primary);
+            color: white;
+            text-decoration: none;
+            padding: 14px 20px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+        .btn-upgrade:hover {
+            background-color: var(--primary-hover);
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 18px;
+            color: #64748b;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .back-link:hover {
+            color: var(--text-main);
+        }
+    </style>
+</head>
+<body>
+    <div class="pricing-card">
+        <span class="badge">PRO PLAN</span>
+        <div class="price">₹199 <span>/ ತಿಂಗಳಿಗೆ</span></div>
+        <p style="color: #64748b; font-size: 14px;">ನಿಮ್ಮ ಎಲ್ಲಾ ವೆಬ್‌ಸೈಟ್‌ಗಳ ನಿರಂತರ ಕಣ್ಗಾವಲಿಗಾಗಿ</p>
+
+        <ul class="features">
+            <li>⚡ ಗರಿಷ್ಠ 15 ವೆಬ್‌ಸೈಟ್‌ಗಳ ಮಾನಿಟರಿಂಗ್</li>
+            <li>🚀 ಅಲ್ಟ್ರಾ-ಫಾಸ್ಟ್ 30 ಸೆಕೆಂಡ್ ಚೆಕಿಂಗ್</li>
+            <li>📱 ತಕ್ಷಣದ ಟೆಲಿಗ್ರಾಂ ಅಲರ್ಟ್ ನೋಟಿಫಿಕೇಶನ್</li>
+            <li>📊 ವಿವರವಾದ ರೆಸ್ಪಾನ್ಸ್ ಟೈಮ್ ಟ್ರ್ಯಾಕಿಂಗ್</li>
+            <li>🛡️ 24/7 ನಿರಂತರ ಸರ್ವರ್ ಕಣ್ಗಾವಲು</li>
+        </ul>
+
+        <div style="background: #f1f5f9; padding: 14px; border-radius: 8px; margin-bottom: 20px; font-size: 13px; color: #475569;">
+            ಪಾವತಿ ಗೇಟ್‌ವೇ ಶೀಘ್ರದಲ್ಲೇ ಲಭ್ಯವಾಗಲಿದೆ (UPI ಸಿಸ್ಟಮ್ ಸಿದ್ಧವಾಗುತ್ತಿದೆ).
+        </div>
+
+        <a href="/dashboard" class="btn-upgrade">ಡ್ಯಾಶ್‌ಬೋರ್ಡ್‌ಗೆ ಹಿಂತಿರುಗಿ</a>
+        <a href="/dashboard" class="back-link">← Cancel</a>
+    </div>
+</body>
+</html>
