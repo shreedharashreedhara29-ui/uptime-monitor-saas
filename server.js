@@ -9,13 +9,14 @@ const app = express();
 const PORT = process.env.PORT || 10000;
 const DB_FILE = path.join(__dirname, 'database.json');
 
-// ಟೆಲಿಗ್ರಾಂ ಸೆಟ್ಟಿಂಗ್ಸ್
-const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '';
-const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID || '';
+// ಡಿಫಾಲ್ಟ್ ಟೆಲಿಗ್ರಾಂ ಸೆಟ್ಟಿಂಗ್ಸ್
+const DEFAULT_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '';
+const DEFAULT_CHAT_ID = process.env.TELEGRAM_CHAT_ID || '';
 
-function sendTelegramAlert(message) {
-    if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) return;
-    const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHAT_ID}&text=${encodeURIComponent(message)}`;
+function sendTelegramAlert(chatId, message) {
+    const targetChatId = chatId || DEFAULT_CHAT_ID;
+    if (!DEFAULT_BOT_TOKEN || !targetChatId) return;
+    const url = `https://api.telegram.org/bot${DEFAULT_BOT_TOKEN}/sendMessage?chat_id=${targetChatId}&text=${encodeURIComponent(message)}`;
     https.get(url, (res) => {}).on('error', (err) => console.error('Telegram Alert Error:', err));
 }
 
@@ -94,13 +95,26 @@ app.get('/signup', (req, res) => {
 });
 
 app.post('/signup', (req, res) => {
-    const { email, password } = req.body;
+    const { name, email, telegramChatId, password, confirmPassword } = req.body;
     const db = readDB();
+
+    if (password !== confirmPassword) {
+        return res.render('signup', { error: 'ಪಾಸ್‌ವರ್ಡ್‌ಗಳು ಹೊಂದಿಕೆಯಾಗುತ್ತಿಲ್ಲ!' });
+    }
+
     const existing = db.users.find(u => u.email === email);
     if (existing) {
         return res.render('signup', { error: 'ಈ ಇಮೇಲ್ ಈಗಾಗಲೇ ಬಳಕೆಯಲ್ಲಿದೆ!' });
     }
-    const newUser = { email, password, plan: 'FREE' };
+
+    const newUser = {
+        name: name || 'User',
+        email,
+        password,
+        telegramChatId: telegramChatId ? telegramChatId.trim() : '',
+        plan: 'FREE'
+    };
+
     db.users.push(newUser);
     writeDB(db);
     req.session.user = newUser;
@@ -170,10 +184,14 @@ function checkSingleSite(site) {
         const newStatus = (res.statusCode >= 200 && res.statusCode < 400) ? 'UP' : 'DOWN';
 
         if (site.status !== 'Checking...' && site.status !== newStatus) {
+            const db = readDB();
+            const owner = db.users.find(u => u.email === site.userEmail);
+            const userChatId = owner ? owner.telegramChatId : '';
+
             if (newStatus === 'DOWN') {
-                sendTelegramAlert(`ALERT: ನಿಮ್ಮ ವೆಬ್‌ಸೈಟ್ ಡೌನ್ ಆಗಿದೆ!\nURL: ${site.url}\nStatus: ${res.statusCode}`);
+                sendTelegramAlert(userChatId, `ALERT: ನಿಮ್ಮ ವೆಬ್‌ಸೈಟ್ ಡೌನ್ ಆಗಿದೆ!\nURL: ${site.url}\nStatus: ${res.statusCode}`);
             } else if (newStatus === 'UP') {
-                sendTelegramAlert(`RECOVERED: ನಿಮ್ಮ ವೆಬ್‌ಸೈಟ್ ಮತ್ತೆ ಆನ್‌ಲೈನ್ ಬಂದಿದೆ!\nURL: ${site.url}\nLatency: ${latency}ms`);
+                sendTelegramAlert(userChatId, `RECOVERED: ನಿಮ್ಮ ವೆಬ್‌ಸೈಟ್ ಮತ್ತೆ ಆನ್‌ಲೈನ್ ಬಂದಿದೆ!\nURL: ${site.url}\nLatency: ${latency}ms`);
             }
         }
 
@@ -189,7 +207,10 @@ function checkSingleSite(site) {
 
     request.on('error', () => {
         if (site.status !== 'DOWN') {
-            sendTelegramAlert(`ALERT: ನಿಮ್ಮ ವೆಬ್‌ಸೈಟ್ ತಲುಪಲು ಸಾಧ್ಯವಾಗುತ್ತಿಲ್ಲ!\nURL: ${site.url}`);
+            const db = readDB();
+            const owner = db.users.find(u => u.email === site.userEmail);
+            const userChatId = owner ? owner.telegramChatId : '';
+            sendTelegramAlert(userChatId, `ALERT: ನಿಮ್ಮ ವೆಬ್‌ಸೈಟ್ ತಲುಪಲು ಸಾಧ್ಯವಾಗುತ್ತಿಲ್ಲ!\nURL: ${site.url}`);
         }
         const db = readDB();
         const target = db.websites.find(s => s.id === site.id);
