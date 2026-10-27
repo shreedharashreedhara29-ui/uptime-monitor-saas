@@ -4,10 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Uptime Monitor</title>
+    <!-- ಪ್ರತಿ 15 ಸೆಕೆಂಡಿಗೆ ಪೇಜ್ ಆಟೋ-ರಿಫ್ರೆಶ್ ಆಗುತ್ತದೆ -->
+    <meta http-equiv="refresh" content="15">
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f8f9fa;
+            background-color: #f4f6f9;
             margin: 0;
             padding: 20px;
         }
@@ -65,10 +67,19 @@
             padding: 4px 8px;
             border-radius: 4px;
             font-size: 12px;
+            font-weight: bold;
         }
         .badge-down {
             background: #dc3545;
             color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .badge-checking {
+            background: #ffc107;
+            color: black;
             padding: 4px 8px;
             border-radius: 4px;
             font-size: 12px;
@@ -79,7 +90,7 @@
     <div class="header">
         <h2>Uptime Monitor Dashboard</h2>
         <div>
-            <span><%= user.email %></span> | 
+            <span><strong><%= user.email %></strong></span> | 
             <a href="/logout" class="btn-logout">Logout</a>
         </div>
     </div>
@@ -97,6 +108,8 @@
                 <tr>
                     <th>URL</th>
                     <th>Status</th>
+                    <th>Response Time (Speed)</th>
+                    <th>Last Checked</th>
                     <th>Action</th>
                 </tr>
             </thead>
@@ -104,18 +117,28 @@
                 <% if (websites && websites.length > 0) { %>
                     <% websites.forEach(site => { %>
                         <tr>
-                            <td><%= site.url %></td>
-                            <td><span class="<%= site.status === 'UP' ? 'badge-up' : 'badge-down' %>"><%= site.status || 'Checking...' %></span></td>
+                            <td><a href="<%= site.url %>" target="_blank"><%= site.url %></a></td>
+                            <td>
+                                <% if (site.status === 'UP') { %>
+                                    <span class="badge-up">UP</span>
+                                <% } else if (site.status === 'DOWN') { %>
+                                    <span class="badge-down">DOWN</span>
+                                <% } else { %>
+                                    <span class="badge-checking"><%= site.status || 'Checking...' %></span>
+                                <% } %>
+                            </td>
+                            <td><strong><%= site.latency ? site.latency + ' ms' : '-' %></strong></td>
+                            <td><%= site.lastChecked || 'Just now' %></td>
                             <td>
                                 <form action="/delete-website/<%= site.id %>" method="POST" style="margin:0;">
-                                    <button type="submit" style="color:red; background:none; border:none; cursor:pointer;">Delete</button>
+                                    <button type="submit" style="color:red; background:none; border:none; cursor:pointer; font-weight:bold;">Delete</button>
                                 </form>
                             </td>
                         </tr>
                     <% }) %>
                 <% } else { %>
                     <tr>
-                        <td colspan="3" style="text-align:center; color:#777;">No websites added yet.</td>
+                        <td colspan="5" style="text-align:center; color:#777;">No websites added yet.</td>
                     </tr>
                 <% } %>
             </tbody>
