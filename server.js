@@ -10,7 +10,7 @@ const app = express();
 const PORT = process.env.PORT || 10000;
 const DB_FILE = path.join(__dirname, 'database.json');
 
-// Razorpay ಸೆಟಪ್ (ನಿಮ್ಮ Key ID ಮತ್ತು Secret ನೊಂದಿಗೆ)
+// Razorpay ಸೆಟಪ್
 const razorpay = new Razorpay({
     key_id: 'rzp_test_TsyKVhtJy6q6B5',
     key_secret: 'Gj2CQFelbQ7Fe4Tp9q0IcVZ6'
@@ -63,7 +63,6 @@ app.use(session({
     cookie: { secure: false, maxAge: 24 * 60 * 60 * 1000 }
 }));
 
-// ದೃಢೀಕರಣ ಚೆಕ್
 function checkAuth(req, res, next) {
     if (req.session && req.session.user) {
         next();
@@ -143,53 +142,68 @@ app.get('/dashboard', checkAuth, (req, res) => {
 
 // 4. ಅಪ್‌ಗ್ರೇಡ್ ಪೇಜ್ ರೂಟ್
 app.get('/upgrade', checkAuth, (req, res) => {
-    res.render('upgrade');
+    const db = readDB();
+    const currentUser = db.users.find(u => u.email === req.session.user.email) || req.session.user;
+    res.render('upgrade', { user: currentUser });
 });
 
-// 5. Razorpay Order ID ರಚಿಸುವ ರೂಟ್
+// 5. Razorpay Order ID ರಚಿಸುವ ರೂಟ್ (Pro ಅಥವಾ Ultra Pro)
 app.post('/create-order', checkAuth, async (req, res) => {
     try {
+        const { planType } = req.body; // 'PRO' ಅಥವಾ 'ULTRA_PRO'
+        let amount = 19900; // ಡಿಫಾಲ್ಟ್ PRO ₹199
+
+        if (planType === 'ULTRA_PRO') {
+            amount = 49900; // ULTRA PRO ₹499
+        }
+
         const options = {
-            amount: 19900, // ₹199 (ಪೈಸೆಯಲ್ಲಿ)
+            amount: amount,
             currency: "INR",
             receipt: "order_rcpt_" + Date.now()
         };
         const order = await razorpay.orders.create(options);
-        res.json({ orderId: order.id });
+        res.json({ orderId: order.id, amount: amount });
     } catch (error) {
         console.error("Order creation error:", error);
         res.status(500).json({ error: 'Order Creation Failed' });
     }
 });
 
-// 6. ಪಾವತಿ ಯಶಸ್ವಿಯಾದಾಗ Pro ಅಪ್‌ಗ್ರೇಡ್ ಮಾಡುವ ರೂಟ್
+// 6. ಪಾವತಿ ಯಶಸ್ವಿಯಾದಾಗ ಅಪ್‌ಗ್ರೇಡ್ ಮಾಡುವ ರೂಟ್
 app.post('/razorpay-success', checkAuth, (req, res) => {
-    const { payment_id, order_id } = req.body;
+    const { payment_id, order_id, planType } = req.body;
     const db = readDB();
     const currentUser = db.users.find(u => u.email === req.session.user.email);
 
+    const targetPlan = (planType === 'ULTRA_PRO') ? 'ULTRA_PRO' : 'PRO';
+
     if (currentUser) {
-        currentUser.plan = 'PRO';
+        currentUser.plan = targetPlan;
         currentUser.paymentId = payment_id;
         writeDB(db);
-        req.session.user.plan = 'PRO';
+        req.session.user.plan = targetPlan;
 
-        sendTelegramAlert('', `🎉 Razorpay ಮೂಲಕ ಹೊಸ ಪಾವತಿ ಯಶಸ್ವಿಯಾಗಿದೆ!\nಬಳಕೆದಾರ: ${currentUser.email}\nPayment ID: ${payment_id}\nOrder ID: ${order_id}\nಪ್ಲಾನ್: PRO (₹199)`);
+        sendTelegramAlert('', `🎉 Razorpay ಮೂಲಕ ಹೊಸ ಪಾವತಿ ಬಂದಿದೆ!\nಬಳಕೆದಾರ: ${currentUser.email}\nಪ್ಲಾನ್: ${targetPlan}\nPayment ID: ${payment_id}`);
     }
 
-    res.json({ success: true });
+    res.json({ success: true, plan: targetPlan });
 });
 
-// 7. ವೆಬ್‌ಸೈಟ್ ಸೇರಿಸುವ ರೂಟ್
+// 7. ವೆಬ್‌ಸೈಟ್ ಸೇರಿಸುವ ರೂಟ್ (ಮಿತಿ ಚೆಕ್)
 app.post('/add-website', checkAuth, (req, res) => {
     const { url } = req.body;
     const db = readDB();
     const currentUser = db.users.find(u => u.email === req.session.user.email) || req.session.user;
     const userSites = db.websites.filter(s => s.userEmail === currentUser.email);
 
-    const limit = (currentUser.plan === 'PRO') ? 15 : 1;
+    let limit = 1; // FREE
+    if (currentUser.plan === 'PRO') limit = 15;
+    if (currentUser.plan === 'ULTRA_PRO') limit = 50;
+
     if (userSites.length >= limit) {
-        return res.send("<script>alert('ಮಿತಿ ತಲುಪಿದೆ! ಉಚಿತ ಖಾತೆಯಲ್ಲಿ ಕೇವಲ 1 ವೆಬ್‌ಸೈಟ್ ಮಾತ್ರ ಸಾಧ್ಯ. ಹೆಚ್ಚಿನ ಸೈಟ್‌ಗಳಿಗಾಗಿ Pro ಪ್ಲಾನ್‌ಗೆ ಅಪ್‌ಗ್ರೇಡ್ ಆಗಿ.'); window.location.href='/upgrade';</script>");
+        let msg = `ಮಿತಿ ತಲುಪಿದೆ! ನಿಮ್ಮ ಪ್ಲಾನ್‌ನಲ್ಲಿ ಗರಿಷ್ಠ ${limit} ವೆಬ್‌ಸೈಟ್‌ಗಳನ್ನು ಮಾತ್ರ ಮಾನಿಟರ್ ಮಾಡಬಹುದು. ಹೆಚ್ಚಿನ ಮಿತಿಗಾಗಿ ಅಪ್‌ಗ್ರೇಡ್ ಮಾಡಿ.`;
+        return res.send(`<script>alert('${msg}'); window.location.href='/upgrade';</script>`);
     }
 
     const newSite = {
@@ -198,6 +212,7 @@ app.post('/add-website', checkAuth, (req, res) => {
         url: url,
         status: 'Checking...',
         latency: 0,
+        lastCheckedTime: 0,
         lastChecked: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
     };
 
@@ -230,9 +245,9 @@ function checkSingleSite(site) {
             const userChatId = owner ? owner.telegramChatId : '';
 
             if (newStatus === 'DOWN') {
-                sendTelegramAlert(userChatId, `ALERT: ನಿಮ್ಮ ವೆಬ್‌ಸೈಟ್ ಡೌನ್ ಆಗಿದೆ!\nURL: ${site.url}\nStatus: ${res.statusCode}`);
+                sendTelegramAlert(userChatId, `🚨 ALERT: ನಿಮ್ಮ ವೆಬ್‌ಸೈಟ್ ಡೌನ್ ಆಗಿದೆ!\nURL: ${site.url}\nStatus: ${res.statusCode}`);
             } else if (newStatus === 'UP') {
-                sendTelegramAlert(userChatId, `RECOVERED: ನಿಮ್ಮ ವೆಬ್‌ಸೈಟ್ ಮತ್ತೆ ಆನ್‌ಲೈನ್ ಬಂದಿದೆ!\nURL: ${site.url}\nLatency: ${latency}ms`);
+                sendTelegramAlert(userChatId, `✅ RECOVERED: ನಿಮ್ಮ ವೆಬ್‌ಸೈಟ್ ಮತ್ತೆ ಆನ್‌ಲೈನ್ ಬಂದಿದೆ!\nURL: ${site.url}\nLatency: ${latency}ms`);
             }
         }
 
@@ -241,6 +256,7 @@ function checkSingleSite(site) {
         if (target) {
             target.status = newStatus;
             target.latency = latency;
+            target.lastCheckedTime = Date.now();
             target.lastChecked = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
             writeDB(db);
         }
@@ -251,13 +267,14 @@ function checkSingleSite(site) {
             const db = readDB();
             const owner = db.users.find(u => u.email === site.userEmail);
             const userChatId = owner ? owner.telegramChatId : '';
-            sendTelegramAlert(userChatId, `ALERT: ನಿಮ್ಮ ವೆಬ್‌ಸೈಟ್ ತಲುಪಲು ಸಾಧ್ಯವಾಗುತ್ತಿಲ್ಲ!\nURL: ${site.url}`);
+            sendTelegramAlert(userChatId, `🚨 ALERT: ನಿಮ್ಮ ವೆಬ್‌ಸೈಟ್ ತಲುಪಲು ಸಾಧ್ಯವಾಗುತ್ತಿಲ್ಲ (Unreachable)!\nURL: ${site.url}`);
         }
         const db = readDB();
         const target = db.websites.find(s => s.id === site.id);
         if (target) {
             target.status = 'DOWN';
             target.latency = 0;
+            target.lastCheckedTime = Date.now();
             target.lastChecked = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
             writeDB(db);
         }
@@ -268,13 +285,28 @@ function checkSingleSite(site) {
     });
 }
 
-// ಪ್ರತಿ 30 ಸೆಕೆಂಡಿಗೆ ಚೆಕ್ ಮಾಡುವ ಲೂಪ್
+// ಸ್ಮಾರ್ಟ್ ಮಾನಿಟರಿಂಗ್ ಲೂಪ್ (ಪ್ರತಿ 3 ಸೆಕೆಂಡಿಗೆ ರನ್ ಆಗಿ ಪ್ಲಾನ್ ಆಧಾರದಲ್ಲಿ ಫಿಲ್ಟರ್ ಮಾಡುತ್ತದೆ)
 setInterval(() => {
     const db = readDB();
+    const now = Date.now();
+
     db.websites.forEach(site => {
-        checkSingleSite(site);
+        const owner = db.users.find(u => u.email === site.userEmail);
+        const plan = owner ? owner.plan : 'FREE';
+
+        let intervalMs = 600000; // FREE: 10 ನಿಮಿಷ (600 ಸೆಕೆಂಡ್)
+        if (plan === 'PRO') {
+            intervalMs = 30000;  // PRO: 30 ಸೆಕೆಂಡ್
+        } else if (plan === 'ULTRA_PRO') {
+            intervalMs = 3000;   // ULTRA PRO: ಪ್ರತಿ 3 ಸೆಕೆಂಡಿಗೆ (Real-time)
+        }
+
+        const lastCheck = site.lastCheckedTime || 0;
+        if (now - lastCheck >= intervalMs) {
+            checkSingleSite(site);
+        }
     });
-}, 30000);
+}, 3000);
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
