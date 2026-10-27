@@ -4,10 +4,17 @@ const fs = require('fs');
 const path = require('path');
 const https = require('https');
 const http = require('http');
+const Razorpay = require('razorpay');
 
 const app = express();
 const PORT = process.env.PORT || 10000;
 const DB_FILE = path.join(__dirname, 'database.json');
+
+// Razorpay ಸೆಟಪ್ (ನಿಮ್ಮ Key ID ಮತ್ತು Secret ನೊಂದಿಗೆ)
+const razorpay = new Razorpay({
+    key_id: 'rzp_test_TsyKVhtJy6q6B5',
+    key_secret: 'Gj2CQFelbQ7Fe4Tp9q0IcVZ6'
+});
 
 // ಡಿಫಾಲ್ಟ್ ಟೆಲಿಗ್ರಾಂ ಸೆಟ್ಟಿಂಗ್ಸ್
 const DEFAULT_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '';
@@ -139,9 +146,25 @@ app.get('/upgrade', checkAuth, (req, res) => {
     res.render('upgrade');
 });
 
-// 5. Razorpay ಪಾವತಿ ಯಶಸ್ವಿಯಾದಾಗ Pro ಅಪ್‌ಗ್ರೇಡ್ ಮಾಡುವ ರೂಟ್
+// 5. Razorpay Order ID ರಚಿಸುವ ರೂಟ್
+app.post('/create-order', checkAuth, async (req, res) => {
+    try {
+        const options = {
+            amount: 19900, // ₹199 (ಪೈಸೆಯಲ್ಲಿ)
+            currency: "INR",
+            receipt: "order_rcpt_" + Date.now()
+        };
+        const order = await razorpay.orders.create(options);
+        res.json({ orderId: order.id });
+    } catch (error) {
+        console.error("Order creation error:", error);
+        res.status(500).json({ error: 'Order Creation Failed' });
+    }
+});
+
+// 6. ಪಾವತಿ ಯಶಸ್ವಿಯಾದಾಗ Pro ಅಪ್‌ಗ್ರೇಡ್ ಮಾಡುವ ರೂಟ್
 app.post('/razorpay-success', checkAuth, (req, res) => {
-    const { payment_id } = req.body;
+    const { payment_id, order_id } = req.body;
     const db = readDB();
     const currentUser = db.users.find(u => u.email === req.session.user.email);
 
@@ -151,14 +174,13 @@ app.post('/razorpay-success', checkAuth, (req, res) => {
         writeDB(db);
         req.session.user.plan = 'PRO';
 
-        // ನಿಮ್ಮ ಟೆಲಿಗ್ರಾಂಗೆ ಹಣ ಬಂದಿರುವ ಅಲರ್ಟ್ ಕಳುಹಿಸುತ್ತದೆ
-        sendTelegramAlert('', `🎉 Razorpay ಮೂಲಕ ಹೊಸ ಪಾವತಿ ಬಂದಿದೆ!\nಬಳಕೆದಾರ: ${currentUser.email}\nPayment ID: ${payment_id}\nಪ್ಲಾನ್: PRO (₹199)`);
+        sendTelegramAlert('', `🎉 Razorpay ಮೂಲಕ ಹೊಸ ಪಾವತಿ ಯಶಸ್ವಿಯಾಗಿದೆ!\nಬಳಕೆದಾರ: ${currentUser.email}\nPayment ID: ${payment_id}\nOrder ID: ${order_id}\nಪ್ಲಾನ್: PRO (₹199)`);
     }
 
     res.json({ success: true });
 });
 
-// 6. ವೆಬ್‌ಸೈಟ್ ಸೇರಿಸುವ ರೂಟ್
+// 7. ವೆಬ್‌ಸೈಟ್ ಸೇರಿಸುವ ರೂಟ್
 app.post('/add-website', checkAuth, (req, res) => {
     const { url } = req.body;
     const db = readDB();
@@ -185,7 +207,7 @@ app.post('/add-website', checkAuth, (req, res) => {
     res.redirect('/dashboard');
 });
 
-// 7. ವೆಬ್‌ಸೈಟ್ ಡಿಲೀಟ್ ಮಾಡುವ ರೂಟ್
+// 8. ವೆಬ್‌ಸೈಟ್ ಡಿಲೀಟ್ ಮಾಡುವ ರೂಟ್
 app.post('/delete-website/:id', checkAuth, (req, res) => {
     const db = readDB();
     db.websites = db.websites.filter(s => !(s.id === req.params.id && s.userEmail === req.session.user.email));
