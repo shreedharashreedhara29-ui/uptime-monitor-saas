@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Upgrade to Pro - Uptime Monitor</title>
-    <!-- Razorpay Checkout Script -->
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <style>
         :root {
@@ -124,12 +123,24 @@
 
     <script>
         document.getElementById('pay-btn').onclick = function(e) {
+            e.preventDefault();
+
             var options = {
                 "key": "rzp_test_Tsy7oGmXPDMYhJ",
                 "amount": 19900,
                 "currency": "INR",
-                "name": "Uptime Monitor SaaS",
-                "description": "Pro Plan Subscription (1 Month)",
+                "name": "Uptime Monitor",
+                "description": "Pro Subscription",
+                "prefill": {
+                    "name": "Customer",
+                    "email": "customer@example.com",
+                    "contact": "9999999999"
+                },
+                "modal": {
+                    "ondismiss": function() {
+                        console.log('Payment modal closed');
+                    }
+                },
                 "handler": function (response){
                     fetch('/razorpay-success', {
                         method: 'POST',
@@ -139,20 +150,30 @@
                         body: JSON.stringify({
                             payment_id: response.razorpay_payment_id
                         })
-                    }).then(res => res.json()).then(data => {
+                    })
+                    .then(res => res.json())
+                    .then(data => {
                         if(data.success) {
-                            alert('ಅಭಿನಂದನೆಗಳು! ನಿಮ್ಮ ಪಾವತಿ ಯಶಸ್ವಿಯಾಗಿದೆ. ಖಾತೆಯನ್ನು PRO ಪ್ಲಾನ್‌ಗೆ ಅಪ್‌ಗ್ರೇಡ್ ಮಾಡಲಾಗಿದೆ.');
+                            alert('ಧನ್ಯವಾದಗಳು! ನಿಮ್ಮ ಖಾತೆಯನ್ನು PRO ಪ್ಲಾನ್‌ಗೆ ಯಶಸ್ವಿಯಾಗಿ ಅಪ್‌ಗ್ರೇಡ್ ಮಾಡಲಾಗಿದೆ.');
                             window.location.href = '/dashboard';
                         }
+                    })
+                    .catch(err => {
+                        window.location.href = '/dashboard';
                     });
                 },
                 "theme": {
                     "color": "#4f46e5"
                 }
             };
+
             var rzp1 = new Razorpay(options);
+            
+            rzp1.on('payment.failed', function (response){
+                alert('ಪಾವತಿ ವಿಫಲವಾಗಿದೆ: ' + response.error.description);
+            });
+
             rzp1.open();
-            e.preventDefault();
         }
     </script>
 </body>
