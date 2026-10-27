@@ -3,16 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Upgrade to Pro - Uptime Monitor</title>
+    <title>Upgrade Plans - Uptime Monitor</title>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <style>
         :root {
             --primary: #4f46e5;
             --primary-hover: #4338ca;
-            --bg: #f8fafc;
-            --card-bg: #ffffff;
-            --text-main: #0f172a;
-            --border: #e2e8f0;
+            --ultra: #ec4899;
+            --ultra-hover: #db2777;
+            --bg: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --border: #334155;
         }
         * {
             box-sizing: border-box;
@@ -24,24 +26,54 @@
             background-color: var(--bg);
             color: var(--text-main);
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
+            justify-content: center;
             min-height: 100vh;
-            padding: 16px;
+            padding: 24px 16px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        .header h1 {
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+        .header p {
+            color: #94a3b8;
+            font-size: 15px;
+        }
+        .pricing-container {
+            display: flex;
+            gap: 20px;
+            max-width: 850px;
+            width: 100%;
+            flex-wrap: wrap;
+            justify-content: center;
         }
         .pricing-card {
             background: var(--card-bg);
-            border: 2px solid var(--primary);
+            border: 2px solid var(--border);
             border-radius: 16px;
             padding: 24px;
-            max-width: 420px;
+            max-width: 380px;
             width: 100%;
             text-align: center;
-            box-shadow: 0 10px 25px rgba(79, 70, 229, 0.1);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+        }
+        .pricing-card.pro {
+            border-color: var(--primary);
+        }
+        .pricing-card.ultra {
+            border-color: var(--ultra);
+            box-shadow: 0 0 25px rgba(236, 72, 153, 0.25);
         }
         .badge {
-            background: #e0e7ff;
-            color: var(--primary);
             padding: 6px 14px;
             border-radius: 9999px;
             font-size: 13px;
@@ -49,14 +81,22 @@
             display: inline-block;
             margin-bottom: 12px;
         }
+        .badge.pro {
+            background: #312e81;
+            color: #818cf8;
+        }
+        .badge.ultra {
+            background: #831843;
+            color: #f472b6;
+        }
         .price {
-            font-size: 36px;
+            font-size: 38px;
             font-weight: 800;
             margin-bottom: 6px;
         }
         .price span {
             font-size: 15px;
-            color: #64748b;
+            color: #94a3b8;
             font-weight: 500;
         }
         .features {
@@ -71,6 +111,7 @@
             display: flex;
             align-items: center;
             gap: 10px;
+            color: #cbd5e1;
         }
         .features li:last-child {
             border-bottom: none;
@@ -78,23 +119,31 @@
         .btn-upgrade {
             display: block;
             width: 100%;
-            background-color: var(--primary);
-            color: white;
             border: none;
             padding: 14px 20px;
             border-radius: 8px;
             font-size: 15px;
             font-weight: 600;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: all 0.2s;
+            color: white;
         }
-        .btn-upgrade:hover {
+        .btn-pro {
+            background-color: var(--primary);
+        }
+        .btn-pro:hover {
             background-color: var(--primary-hover);
+        }
+        .btn-ultra {
+            background-color: var(--ultra);
+        }
+        .btn-ultra:hover {
+            background-color: var(--ultra-hover);
         }
         .back-link {
             display: inline-block;
-            margin-top: 16px;
-            color: #64748b;
+            margin-top: 24px;
+            color: #94a3b8;
             text-decoration: none;
             font-size: 14px;
         }
@@ -104,47 +153,70 @@
     </style>
 </head>
 <body>
-    <div class="pricing-card">
-        <span class="badge">PRO PLAN</span>
-        <div class="price">₹199 <span>/ ತಿಂಗಳಿಗೆ</span></div>
-        <p style="color: #64748b; font-size: 13px;">ನಿಮ್ಮ ಎಲ್ಲಾ ವೆಬ್‌ಸೈಟ್‌ಗಳ ನಿರಂತರ ಕಣ್ಗಾವಲಿಗಾಗಿ</p>
-
-        <ul class="features">
-            <li>⚡ ಗರಿಷ್ಠ 15 ವೆಬ್‌ಸೈಟ್‌ಗಳ ಮಾನಿಟರಿಂಗ್</li>
-            <li>🚀 ಅಲ್ಟ್ರಾ-ಫಾಸ್ಟ್ 30 ಸೆಕೆಂಡ್ ಚೆಕಿಂಗ್</li>
-            <li>📱 ತಕ್ಷಣದ ಟೆಲಿಗ್ರಾಂ ಅಲರ್ಟ್ ನೋಟಿಫಿಕೇಶನ್</li>
-            <li>📊 ವಿವರವಾದ ರೆಸ್ಪಾನ್ಸ್ ಟೈಮ್ ಟ್ರ್ಯಾಕಿಂಗ್</li>
-            <li>🛡️ 24/7 ನಿರಂತರ ಸರ್ವರ್ ಕಣ್ಗಾವಲು</li>
-        </ul>
-
-        <button id="pay-btn" class="btn-upgrade">₹199 ಪಾವತಿಸಿ ಅಪ್‌ಗ್ರೇಡ್ ಮಾಡಿ</button>
-        <a href="/dashboard" class="back-link">← ಡ್ಯಾಶ್‌ಬೋರ್ಡ್‌ಗೆ ಹಿಂತಿರುಗಿ</a>
+    <div class="header">
+        <h1>ನಿಮ್ಮ ಅಗತ್ಯಕ್ಕೆ ತಕ್ಕ ಪ್ಲಾನ್ ಆರಿಸಿ</h1>
+        <p>ವೆಬ್‌ಸೈಟ್‌ಗಳ ನಿಖರ ಮತ್ತು ಕ್ಷಿಪ್ರ ಕಣ್ಗಾವಲಿಗಾಗಿ ಅಪ್‌ಗ್ರೇಡ್ ಮಾಡಿ</p>
     </div>
 
-    <script>
-        document.getElementById('pay-btn').onclick = async function(e) {
-            e.preventDefault();
-            const btn = document.getElementById('pay-btn');
-            btn.innerText = "ದಯವಿಟ್ಟು ಕಾಯಿರಿ...";
-            btn.disabled = true;
+    <div class="pricing-container">
+        <!-- PRO PLAN -->
+        <div class="pricing-card pro">
+            <div>
+                <span class="badge pro">PRO PLAN</span>
+                <div class="price">₹199 <span>/ ತಿಂಗಳಿಗೆ</span></div>
+                <p style="color: #94a3b8; font-size: 13px;">ಸಣ್ಣ ಬಿಸಿನೆಸ್ ಮತ್ತು ಬ್ಲಾಗ್‌ಗಳಿಗೆ ಸೂಕ್ತ</p>
 
+                <ul class="features">
+                    <li>⚡ ಗರಿಷ್ಠ 15 ವೆಬ್‌ಸೈಟ್‌ಗಳ ಮಾನಿಟರಿಂಗ್</li>
+                    <li>⏱️ ಪ್ರತಿ 30 ಸೆಕೆಂಡಿಗೆ ತಪಾಸಣೆ</li>
+                    <li>📱 ತಕ್ಷಣದ ಟೆಲಿಗ್ರಾಂ ಅಲರ್ಟ್</li>
+                    <li>📊 ರೆಸ್ಪಾನ್ಸ್ ಟೈಮ್ ಟ್ರ್ಯಾಕಿಂಗ್</li>
+                </ul>
+            </div>
+            <button class="btn-upgrade btn-pro" onclick="payNow('PRO', 19900)">PRO ಗೆ ಅಪ್‌ಗ್ರೇಡ್ ಮಾಡಿ</button>
+        </div>
+
+        <!-- ULTRA PRO PLAN -->
+        <div class="pricing-card ultra">
+            <div>
+                <span class="badge ultra">⚡ ULTRA PRO PLAN</span>
+                <div class="price">₹499 <span>/ ತಿಂಗಳಿಗೆ</span></div>
+                <p style="color: #f472b6; font-size: 13px;">ಹೈ-ಸ್ಪೀಡ್ ಇ-ಕಾಮರ್ಸ್ & ಕ್ರಿಟಿಕಲ್ ಸರ್ವರ್‌ಗಳಿಗೆ</p>
+
+                <ul class="features">
+                    <li>🚀 ಗರಿಷ್ಠ 50 ವೆಬ್‌ಸೈಟ್‌ಗಳ ಮಾನಿಟರಿಂಗ್</li>
+                    <li>⚡ ಪ್ರತಿ 3 ಸೆಕೆಂಡಿಗೆ ರಿಯಲ್-ಟೈಮ್ ಚೆಕ್!</li>
+                    <li>🚨 ತಕ್ಷಣದ ಲೈವ್ ಟೆಲಿಗ್ರಾಂ ಸಂದೇಶ</li>
+                    <li>🛡️ 24/7 ನಿರಂತರ ಅಲ್ಟ್ರಾ ಹೈ-ಪ್ರಯಾರಿಟಿ ಮಾನಿಟರಿಂಗ್</li>
+                </ul>
+            </div>
+            <button class="btn-upgrade btn-ultra" onclick="payNow('ULTRA_PRO', 49900)">ULTRA PRO ಪಡೆಯಿರಿ</button>
+        </div>
+    </div>
+
+    <a href="/dashboard" class="back-link">← ಡ್ಯಾಶ್‌ಬೋರ್ಡ್‌ಗೆ ಹಿಂತಿರುಗಿ</a>
+
+    <script>
+        async function payNow(planType, amount) {
             try {
-                const res = await fetch('/create-order', { method: 'POST' });
+                const res = await fetch('/create-order', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ planType: planType })
+                });
                 const orderData = await res.json();
 
                 if (!orderData.orderId) {
                     alert('Order ID ರಚಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ!');
-                    btn.innerText = "₹199 ಪಾವತಿಸಿ ಅಪ್‌ಗ್ರೇಡ್ ಮಾಡಿ";
-                    btn.disabled = false;
                     return;
                 }
 
                 var options = {
                     "key": "rzp_test_TsyKVhtJy6q6B5",
-                    "amount": 19900,
+                    "amount": amount,
                     "currency": "INR",
                     "name": "Uptime Monitor",
-                    "description": "Pro Plan Subscription",
+                    "description": planType + " Subscription",
                     "order_id": orderData.orderId,
                     "handler": function (response){
                         fetch('/razorpay-success', {
@@ -152,23 +224,18 @@
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
                                 payment_id: response.razorpay_payment_id,
-                                order_id: response.razorpay_order_id
+                                order_id: response.razorpay_order_id,
+                                planType: planType
                             })
                         }).then(r => r.json()).then(data => {
                             if(data.success) {
-                                alert('ಅಭಿನಂದನೆಗಳು! ಪಾವತಿ ಯಶಸ್ವಿಯಾಗಿದೆ. ನಿಮ್ಮ ಖಾತೆಯನ್ನು PRO ಪ್ಲಾನ್‌ಗೆ ಅಪ್‌ಗ್ರೇಡ್ ಮಾಡಲಾಗಿದೆ.');
+                                alert('ಅಭಿನಂದನೆಗಳು! ಪಾವತಿ ಯಶಸ್ವಿಯಾಗಿದೆ. ನಿಮ್ಮ ಖಾತೆಯನ್ನು ' + data.plan + ' ಪ್ಲಾನ್‌ಗೆ ಅಪ್‌ಗ್ರೇಡ್ ಮಾಡಲಾಗಿದೆ.');
                                 window.location.href = '/dashboard';
                             }
                         });
                     },
-                    "modal": {
-                        "ondismiss": function() {
-                            btn.innerText = "₹199 ಪಾವತಿಸಿ ಅಪ್‌ಗ್ರೇಡ್ ಮಾಡಿ";
-                            btn.disabled = false;
-                        }
-                    },
                     "theme": {
-                        "color": "#4f46e5"
+                        "color": (planType === 'ULTRA_PRO') ? "#ec4899" : "#4f46e5"
                     }
                 };
 
@@ -176,10 +243,8 @@
                 rzp1.open();
             } catch (err) {
                 alert('ದೋಷ ಎದುರಾಗಿದೆ, ದಯವಿಟ್ಟು ಪುನಃ ಪ್ರಯತ್ನಿಸಿ.');
-                btn.innerText = "₹199 ಪಾವತಿಸಿ ಅಪ್‌ಗ್ರೇಡ್ ಮಾಡಿ";
-                btn.disabled = false;
             }
-        };
+        }
     </script>
 </body>
 </html>
