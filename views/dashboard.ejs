@@ -453,6 +453,18 @@
 </head>
 <body>
 
+    <% 
+        const userPlan = (user && user.plan) ? user.plan : 'FREE';
+        const userEmail = (user && user.email) ? user.email : 'User';
+        const siteList = Array.isArray(websites) ? websites : [];
+
+        let totalCount = siteList.length;
+        let onlineCount = siteList.filter(s => s.status === 'UP').length;
+        let downCount = siteList.filter(s => s.status === 'DOWN').length;
+        let totalLatency = siteList.reduce((acc, s) => acc + (s.latency || 0), 0);
+        let avgLatency = totalCount > 0 ? Math.round(totalLatency / totalCount) : 0;
+    %>
+
     <!-- Header Navigation -->
     <header class="navbar">
         <a href="/dashboard" class="brand">
@@ -460,9 +472,9 @@
             <span>Uptime Monitor</span>
         </a>
         <div class="user-nav">
-            <span class="user-email"><%= user.email %></span>
-            <span class="plan-badge <%= user.plan %>"><%= user.plan.replace('_', ' ') %></span>
-            <% if (user.plan !== 'ULTRA_PRO') { %>
+            <span class="user-email"><%= userEmail %></span>
+            <span class="plan-badge <%= userPlan %>"><%= userPlan.replace('_', ' ') %></span>
+            <% if (userPlan !== 'ULTRA_PRO') { %>
                 <a href="/upgrade" class="btn-nav-upgrade">⚡ Upgrade</a>
             <% } %>
             <a href="/logout" class="btn-logout">Logout</a>
@@ -470,15 +482,6 @@
     </header>
 
     <main class="container">
-        
-        <!-- Quick Stats Cards Calculation -->
-        <%
-            let totalCount = websites.length;
-            let onlineCount = websites.filter(s => s.status === 'UP').length;
-            let downCount = websites.filter(s => s.status === 'DOWN').length;
-            let totalLatency = websites.reduce((acc, s) => acc + (s.latency || 0), 0);
-            let avgLatency = totalCount > 0 ? Math.round(totalLatency / totalCount) : 0;
-        %>
 
         <!-- 4 Stats Analytics Cards -->
         <div class="stats-grid">
@@ -522,7 +525,7 @@
             </div>
 
             <div class="table-container">
-                <% if (websites.length === 0) { %>
+                <% if (siteList.length === 0) { %>
                     <div class="empty-state">
                         <div class="empty-icon">📡</div>
                         <p style="font-weight: 600; font-size: 15px; margin-bottom: 4px;">No monitors created yet</p>
@@ -540,7 +543,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <% websites.forEach(site => { %>
+                            <% siteList.forEach(site => { %>
                                 <tr>
                                     <td>
                                         <a href="<%= site.url %>" target="_blank" class="site-url-box">
@@ -582,15 +585,12 @@
 
     </main>
 
-    <!-- Auto Refresh Script for Realtime Accuracy -->
     <script>
-        // ULTRA PRO ಆಗಿದ್ದರೆ ಪ್ರತಿ 5 ಸೆಕೆಂಡಿಗೆ, ಇಲ್ಲದಿದ್ದರೆ ಪ್ರತಿ 20 ಸೆಕೆಂಡಿಗೆ ಹಿನ್ನೆಲೆಯಲ್ಲಿ ರಿಫ್ರೆಶ್ ಆಗುತ್ತದೆ
-        const isUltra = '<%= user.plan %>' === 'ULTRA_PRO';
+        const isUltra = '<%= userPlan %>' === 'ULTRA_PRO';
         const refreshInterval = isUltra ? 5000 : 20000;
 
         setInterval(() => {
-            // ಇನ್ಪುಟ್ ಬಾಕ್ಸ್‌ನಲ್ಲಿ ಟೈಪ್ ಮಾಡುತ್ತಿಲ್ಲದಿದ್ದರೆ ಮಾತ್ರ ರಿಫ್ರೆಶ್ ಮಾಡು
-            const activeInput = document.activeElement.tagName === 'INPUT';
+            const activeInput = document.activeElement && document.activeElement.tagName === 'INPUT';
             if (!activeInput) {
                 window.location.reload();
             }
