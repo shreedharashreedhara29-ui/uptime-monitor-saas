@@ -120,7 +120,12 @@ app.get('/dashboard', checkAuth, (req, res) => {
     res.render('dashboard', { user: currentUser, websites: userSites });
 });
 
-// 4. ವೆಬ್‌ಸೈಟ್ ಸೇರಿಸುವ ರೂಟ್
+// 4. ಅಪ್‌ಗ್ರೇಡ್ ಪೇಜ್ ರೂಟ್
+app.get('/upgrade', checkAuth, (req, res) => {
+    res.render('upgrade');
+});
+
+// 5. ವೆಬ್‌ಸೈಟ್ ಸೇರಿಸುವ ರೂಟ್
 app.post('/add-website', checkAuth, (req, res) => {
     const { url } = req.body;
     const db = readDB();
@@ -129,7 +134,7 @@ app.post('/add-website', checkAuth, (req, res) => {
 
     const limit = (currentUser.plan === 'PRO') ? 15 : 1;
     if (userSites.length >= limit) {
-        return res.send("<script>alert('ಮಿತಿ ತಲುಪಿದೆ! ಉಚಿತ ಖಾತೆಯಲ್ಲಿ ಕೇವಲ 1 ವೆಬ್‌ಸೈಟ್ ಮಾತ್ರ ಸಾಧ್ಯ.'); window.location.href='/dashboard';</script>");
+        return res.send("<script>alert('ಮಿತಿ ತಲುಪಿದೆ! ಉಚಿತ ಖಾತೆಯಲ್ಲಿ ಕೇವಲ 1 ವೆಬ್‌ಸೈಟ್ ಮಾತ್ರ ಸಾಧ್ಯ. ಹೆಚ್ಚಿನ ಸೈಟ್‌ಗಳಿಗಾಗಿ Pro ಪ್ಲಾನ್‌ಗೆ ಅಪ್‌ಗ್ರೇಡ್ ಆಗಿ.'); window.location.href='/upgrade';</script>");
     }
 
     const newSite = {
@@ -147,7 +152,7 @@ app.post('/add-website', checkAuth, (req, res) => {
     res.redirect('/dashboard');
 });
 
-// 5. ವೆಬ್‌ಸೈಟ್ ಡಿಲೀಟ್ ಮಾಡುವ ರೂಟ್
+// 6. ವೆಬ್‌ಸೈಟ್ ಡಿಲೀಟ್ ಮಾಡುವ ರೂಟ್
 app.post('/delete-website/:id', checkAuth, (req, res) => {
     const db = readDB();
     db.websites = db.websites.filter(s => !(s.id === req.params.id && s.userEmail === req.session.user.email));
@@ -201,7 +206,7 @@ function checkSingleSite(site) {
     });
 }
 
-// ಪ್ರತಿ 30 ಸೆಕೆಂಡಿಗೆ ಎಲ್ಲಾ ಸೈಟ್‌ಗಳನ್ನು ಆಟೋ ಚೆಕ್ ಮಾಡುವ ಲೂಪ್
+// ಪ್ರತಿ 30 ಸೆಕೆಂಡಿಗೆ ಚೆಕ್ ಮಾಡುವ ಲೂಪ್
 setInterval(() => {
     const db = readDB();
     db.websites.forEach(site => {
