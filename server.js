@@ -9,17 +9,17 @@ const app = express();
 const PORT = process.env.PORT || 10000;
 const DB_FILE = path.join(__dirname, 'database.json');
 
-// --- ಟೆಲಿಗ್ರಾಂ ಅಲರ್ಟ್ ಸೆಟ್ಟಿಂಗ್ಸ್ (ನಿಮ್ಮ ವಿವರಗಳನ್ನು ಕೆಳಗೆ ಹಾಕಿ) ---
-const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || ''; 
+// ಟೆಲಿಗ್ರಾಂ ಸೆಟ್ಟಿಂಗ್ಸ್
+const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || '';
 const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID || '';
 
 function sendTelegramAlert(message) {
     if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) return;
     const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHAT_ID}&text=${encodeURIComponent(message)}`;
-    https.get(url, (res) => {}).on('error', (err) => console.error('Telegram Alert Error:', err.message));
+    https.get(url, (res) => {}).on('error', (err) => console.error('Telegram Alert Error:', err));
 }
 
-// ಡಾಟಾಬೇಸ್ ನಿರ್ವಹಣೆ
+// ಡೇಟಾಬೇಸ್ ನಿರ್ವಹಣೆ
 function readDB() {
     try {
         if (!fs.existsSync(DB_FILE)) {
@@ -64,7 +64,7 @@ function checkAuth(req, res, next) {
     }
 }
 
-// 1. ಲ್ಯಾಂಡಿಂಗ್ ಪೇಜ್ (ಮುಖಪುಟ)
+// 1. ಲ್ಯಾಂಡಿಂಗ್ ಪೇಜ್
 app.get('/', (req, res) => {
     if (req.session && req.session.user) {
         return res.redirect('/dashboard');
@@ -72,7 +72,7 @@ app.get('/', (req, res) => {
     res.render('index');
 });
 
-// 2. ಲಾಗಿನ್ & ಸೈನ್ ಅಪ್ ರೌಟ್‌ಗಳು
+// 2. ಲಾಗಿನ್ & ಸೈನ್ ಅಪ್
 app.get('/login', (req, res) => {
     res.render('login', { error: null });
 });
@@ -112,7 +112,7 @@ app.get('/logout', (req, res) => {
     res.redirect('/login');
 });
 
-// 3. ಡ್ಯಾಶ್‌ಬೋರ್ಡ್ ರೌಟ್
+// 3. ಡ್ಯಾಶ್‌ಬೋರ್ಡ್ ರೂಟ್
 app.get('/dashboard', checkAuth, (req, res) => {
     const db = readDB();
     const currentUser = db.users.find(u => u.email === req.session.user.email) || req.session.user;
@@ -120,7 +120,7 @@ app.get('/dashboard', checkAuth, (req, res) => {
     res.render('dashboard', { user: currentUser, websites: userSites });
 });
 
-// 4. ವೆಬ್‌ಸೈಟ್ ಸೇರಿಸುವ ರೌಟ್ (ಫ್ರೀಮಿಯಮ್ ಮಿತಿ ಪರಿಶೀಲನೆ)
+// 4. ವೆಬ್‌ಸೈಟ್ ಸೇರಿಸುವ ರೂಟ್
 app.post('/add-website', checkAuth, (req, res) => {
     const { url } = req.body;
     const db = readDB();
@@ -129,12 +129,7 @@ app.post('/add-website', checkAuth, (req, res) => {
 
     const limit = (currentUser.plan === 'PRO') ? 15 : 1;
     if (userSites.length >= limit) {
-        return res.send(`
-            <script>
-                alert('⚠️ ಮಿತಿ ತಲುಪಿದೆ! ಉಚಿತ ಖಾತೆಯಲ್ಲಿ ಕೇವಲ 1 ವೆಬ್‌ಸೈಟ್ ಮಾತ್ರ ಸಾಧ್ಯ. Pro ಪ್ಲಾನ್‌ಗೆ ಅಪ್‌ಗ್ರೇಡ್ ಮಾಡಿ.');
-                window.location.href = '/dashboard';
-            </script>
-        `);
+        return res.send("<script>alert('ಮಿತಿ ತಲುಪಿದೆ! ಉಚಿತ ಖಾತೆಯಲ್ಲಿ ಕೇವಲ 1 ವೆಬ್‌ಸೈಟ್ ಮಾತ್ರ ಸಾಧ್ಯ.'); window.location.href='/dashboard';</script>");
     }
 
     const newSite = {
@@ -143,15 +138,16 @@ app.post('/add-website', checkAuth, (req, res) => {
         url: url,
         status: 'Checking...',
         latency: 0,
-        lastChecked: new Date().toLocaleTimeString()
+        lastChecked: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
     };
 
     db.websites.push(newSite);
     writeDB(db);
+    checkSingleSite(newSite);
     res.redirect('/dashboard');
 });
 
-// 5. ವೆಬ್‌ಸೈಟ್ ಡಿಲೀಟ್ ಮಾಡುವ ರೌಟ್
+// 5. ವೆಬ್‌ಸೈಟ್ ಡಿಲೀಟ್ ಮಾಡುವ ರೂಟ್
 app.post('/delete-website/:id', checkAuth, (req, res) => {
     const db = readDB();
     db.websites = db.websites.filter(s => !(s.id === req.params.id && s.userEmail === req.session.user.email));
@@ -159,7 +155,7 @@ app.post('/delete-website/:id', checkAuth, (req, res) => {
     res.redirect('/dashboard');
 });
 
-// --- ಆಟೋಮ್ಯಾಟಿಕ್ ಮಾನಿಟರಿಂಗ್ ಮತ್ತು ಅಲರ್ಟ್ ಇಂಜಿನ್ ---
+// ಆಟೋಮ್ಯಾಟಿಕ್ ಮಾನಿಟರಿಂಗ್ ಇಂಜಿನ್
 function checkSingleSite(site) {
     const startTime = Date.now();
     const client = site.url.startsWith('https') ? https : http;
@@ -167,28 +163,37 @@ function checkSingleSite(site) {
     const request = client.get(site.url, (res) => {
         const latency = Date.now() - startTime;
         const newStatus = (res.statusCode >= 200 && res.statusCode < 400) ? 'UP' : 'DOWN';
-        
-        // ಸ್ಟೇಟಸ್ ಬದಲಾದಾಗ ಟೆಲಿಗ್ರಾಂ ಅಲರ್ಟ್
+
         if (site.status !== 'Checking...' && site.status !== newStatus) {
             if (newStatus === 'DOWN') {
-                sendTelegramAlert(`🚨 ALERT: ನಿಮ್ಮ ವೆಬ್‌ಸೈಟ್ ಡೌನ್ ಆಗಿದೆ!\nURL: ${site.url}\nStatus: ${res.statusCode}\nTime: ${new Date().toLocaleTimeString()}`);
+                sendTelegramAlert(`ALERT: ನಿಮ್ಮ ವೆಬ್‌ಸೈಟ್ ಡೌನ್ ಆಗಿದೆ!\nURL: ${site.url}\nStatus: ${res.statusCode}`);
             } else if (newStatus === 'UP') {
-                sendTelegramAlert(`✅ RECOVERED: ನಿಮ್ಮ ವೆಬ್‌ಸೈಟ್ ಮತ್ತೆ ಆನ್‌ಲೈನ್ ಬಂದಿದೆ!\nURL: ${site.url}\nLatency: ${latency}ms`);
+                sendTelegramAlert(`RECOVERED: ನಿಮ್ಮ ವೆಬ್‌ಸೈಟ್ ಮತ್ತೆ ಆನ್‌ಲೈನ್ ಬಂದಿದೆ!\nURL: ${site.url}\nLatency: ${latency}ms`);
             }
         }
 
-        site.status = newStatus;
-        site.latency = latency;
-        site.lastChecked = new Date().toLocaleTimeString();
+        const db = readDB();
+        const target = db.websites.find(s => s.id === site.id);
+        if (target) {
+            target.status = newStatus;
+            target.latency = latency;
+            target.lastChecked = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            writeDB(db);
+        }
     });
 
     request.on('error', () => {
         if (site.status !== 'DOWN') {
-            sendTelegramAlert(`🚨 ALERT: ನಿಮ್ಮ ವೆಬ್‌ಸೈಟ್ ಲಭ್ಯವಿಲ್ಲ (Unreachable)!\nURL: ${site.url}\nTime: ${new Date().toLocaleTimeString()}`);
+            sendTelegramAlert(`ALERT: ನಿಮ್ಮ ವೆಬ್‌ಸೈಟ್ ತಲುಪಲು ಸಾಧ್ಯವಾಗುತ್ತಿಲ್ಲ!\nURL: ${site.url}`);
         }
-        site.status = 'DOWN';
-        site.latency = 0;
-        site.lastChecked = new Date().toLocaleTimeString();
+        const db = readDB();
+        const target = db.websites.find(s => s.id === site.id);
+        if (target) {
+            target.status = 'DOWN';
+            target.latency = 0;
+            target.lastChecked = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            writeDB(db);
+        }
     });
 
     request.setTimeout(5000, () => {
@@ -196,27 +201,12 @@ function checkSingleSite(site) {
     });
 }
 
-// ಪ್ರತಿ 30 ಸೆಕೆಂಡಿಗೆ ರನ್ ಆಗಿ Pro ಮತ್ತು Free ಬಳಕೆದಾರರನ್ನು ಪರಿಶೀಲಿಸುವ ಲೂಪ್
-let tickCounter = 0;
+// ಪ್ರತಿ 30 ಸೆಕೆಂಡಿಗೆ ಎಲ್ಲಾ ಸೈಟ್‌ಗಳನ್ನು ಆಟೋ ಚೆಕ್ ಮಾಡುವ ಲೂಪ್
 setInterval(() => {
     const db = readDB();
-    tickCounter++;
-
     db.websites.forEach(site => {
-        const owner = db.users.find(u => u.email === site.userEmail);
-        const isPro = owner && owner.plan === 'PRO';
-
-        // Pro ಬಳಕೆದಾರರಿಗೆ ಪ್ರತಿ 30 ಸೆಕೆಂಡಿಗೆ ಚೆಕ್
-        if (isPro) {
-            checkSingleSite(site);
-        } 
-        // Free ಬಳಕೆದಾರರಿಗೆ ಪ್ರತಿ 10 ನಿಮಿಷಕ್ಕೆ (20 ticks x 30s = 600s = 10 mins) ಚೆಕ್
-        else if (tickCounter % 20 === 0) {
-            checkSingleSite(site);
-        }
+        checkSingleSite(site);
     });
-
-    writeDB(db);
 }, 30000);
 
 app.listen(PORT, () => {
