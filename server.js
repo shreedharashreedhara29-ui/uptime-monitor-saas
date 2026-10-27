@@ -139,7 +139,26 @@ app.get('/upgrade', checkAuth, (req, res) => {
     res.render('upgrade');
 });
 
-// 5. ವೆಬ್‌ಸೈಟ್ ಸೇರಿಸುವ ರೂಟ್
+// 5. Razorpay ಪಾವತಿ ಯಶಸ್ವಿಯಾದಾಗ Pro ಅಪ್‌ಗ್ರೇಡ್ ಮಾಡುವ ರೂಟ್
+app.post('/razorpay-success', checkAuth, (req, res) => {
+    const { payment_id } = req.body;
+    const db = readDB();
+    const currentUser = db.users.find(u => u.email === req.session.user.email);
+
+    if (currentUser) {
+        currentUser.plan = 'PRO';
+        currentUser.paymentId = payment_id;
+        writeDB(db);
+        req.session.user.plan = 'PRO';
+
+        // ನಿಮ್ಮ ಟೆಲಿಗ್ರಾಂಗೆ ಹಣ ಬಂದಿರುವ ಅಲರ್ಟ್ ಕಳುಹಿಸುತ್ತದೆ
+        sendTelegramAlert('', `🎉 Razorpay ಮೂಲಕ ಹೊಸ ಪಾವತಿ ಬಂದಿದೆ!\nಬಳಕೆದಾರ: ${currentUser.email}\nPayment ID: ${payment_id}\nಪ್ಲಾನ್: PRO (₹199)`);
+    }
+
+    res.json({ success: true });
+});
+
+// 6. ವೆಬ್‌ಸೈಟ್ ಸೇರಿಸುವ ರೂಟ್
 app.post('/add-website', checkAuth, (req, res) => {
     const { url } = req.body;
     const db = readDB();
@@ -166,7 +185,7 @@ app.post('/add-website', checkAuth, (req, res) => {
     res.redirect('/dashboard');
 });
 
-// 6. ವೆಬ್‌ಸೈಟ್ ಡಿಲೀಟ್ ಮಾಡುವ ರೂಟ್
+// 7. ವೆಬ್‌ಸೈಟ್ ಡಿಲೀಟ್ ಮಾಡುವ ರೂಟ್
 app.post('/delete-website/:id', checkAuth, (req, res) => {
     const db = readDB();
     db.websites = db.websites.filter(s => !(s.id === req.params.id && s.userEmail === req.session.user.email));
