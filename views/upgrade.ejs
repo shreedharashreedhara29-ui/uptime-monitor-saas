@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Upgrade to Pro - Uptime Monitor</title>
+    <!-- Razorpay Checkout Script -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <style>
         :root {
             --primary: #4f46e5;
@@ -76,13 +78,15 @@
         }
         .btn-upgrade {
             display: block;
+            width: 100%;
             background-color: var(--primary);
             color: white;
-            text-decoration: none;
+            border: none;
             padding: 14px 20px;
             border-radius: 8px;
             font-size: 15px;
             font-weight: 600;
+            cursor: pointer;
             transition: background 0.2s;
         }
         .btn-upgrade:hover {
@@ -114,12 +118,42 @@
             <li>🛡️ 24/7 ನಿರಂತರ ಸರ್ವರ್ ಕಣ್ಗಾವಲು</li>
         </ul>
 
-        <div style="background: #f1f5f9; padding: 12px; border-radius: 8px; margin-bottom: 18px; font-size: 12px; color: #475569;">
-            ಪಾವತಿ ಸೌಲಭ್ಯ ಶೀಘ್ರದಲ್ಲೇ ಲಭ್ಯವಾಗಲಿದೆ (UPI ಸಿಸ್ಟಮ್ ಸಿದ್ಧವಾಗುತ್ತಿದೆ).
-        </div>
-
-        <a href="/dashboard" class="btn-upgrade">ಡ್ಯಾಶ್‌ಬೋರ್ಡ್‌ಗೆ ಹಿಂತಿರುಗಿ</a>
-        <a href="/dashboard" class="back-link">← Cancel</a>
+        <button id="pay-btn" class="btn-upgrade">₹199 ಪಾವತಿಸಿ ಅಪ್‌ಗ್ರೇಡ್ ಮಾಡಿ</button>
+        <a href="/dashboard" class="back-link">← ಡ್ಯಾಶ್‌ಬೋರ್ಡ್‌ಗೆ ಹಿಂತಿರುಗಿ</a>
     </div>
+
+    <script>
+        document.getElementById('pay-btn').onclick = function(e) {
+            var options = {
+                "key": "rzp_test_Tsy7oGmXPDMYhJ",
+                "amount": 19900,
+                "currency": "INR",
+                "name": "Uptime Monitor SaaS",
+                "description": "Pro Plan Subscription (1 Month)",
+                "handler": function (response){
+                    fetch('/razorpay-success', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            payment_id: response.razorpay_payment_id
+                        })
+                    }).then(res => res.json()).then(data => {
+                        if(data.success) {
+                            alert('ಅಭಿನಂದನೆಗಳು! ನಿಮ್ಮ ಪಾವತಿ ಯಶಸ್ವಿಯಾಗಿದೆ. ಖಾತೆಯನ್ನು PRO ಪ್ಲಾನ್‌ಗೆ ಅಪ್‌ಗ್ರೇಡ್ ಮಾಡಲಾಗಿದೆ.');
+                            window.location.href = '/dashboard';
+                        }
+                    });
+                },
+                "theme": {
+                    "color": "#4f46e5"
+                }
+            };
+            var rzp1 = new Razorpay(options);
+            rzp1.open();
+            e.preventDefault();
+        }
+    </script>
 </body>
 </html>
