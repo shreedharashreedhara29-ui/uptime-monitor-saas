@@ -1,14 +1,13 @@
 {
   "name": "uptime-monitor-saas",
   "version": "1.0.0",
-  "description": "Uptime Monitoring SaaS Application",
+  "description": "Enterprise Uptime Monitoring SaaS",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
     "axios": "^1.6.8",
-    "ejs": "^3.1.9",
     "express": "^4.19.2",
     "express-session": "^1.18.0",
     "twilio": "^5.0.0"
