@@ -122,59 +122,64 @@
     </div>
 
     <script>
-        document.getElementById('pay-btn').onclick = function(e) {
+        document.getElementById('pay-btn').onclick = async function(e) {
             e.preventDefault();
+            const btn = document.getElementById('pay-btn');
+            btn.innerText = "ದಯವಿಟ್ಟು ಕಾಯಿರಿ...";
+            btn.disabled = true;
 
-            var options = {
-                "key": "rzp_test_Tsy7oGmXPDMYhJ",
-                "amount": 19900,
-                "currency": "INR",
-                "name": "Uptime Monitor",
-                "description": "Pro Subscription",
-                "prefill": {
-                    "name": "Customer",
-                    "email": "customer@example.com",
-                    "contact": "9999999999"
-                },
-                "modal": {
-                    "ondismiss": function() {
-                        console.log('Payment modal closed');
-                    }
-                },
-                "handler": function (response){
-                    fetch('/razorpay-success', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            payment_id: response.razorpay_payment_id
-                        })
-                    })
-                    .then(res => res.json())
-                    .then(data => {
-                        if(data.success) {
-                            alert('ಧನ್ಯವಾದಗಳು! ನಿಮ್ಮ ಖಾತೆಯನ್ನು PRO ಪ್ಲಾನ್‌ಗೆ ಯಶಸ್ವಿಯಾಗಿ ಅಪ್‌ಗ್ರೇಡ್ ಮಾಡಲಾಗಿದೆ.');
-                            window.location.href = '/dashboard';
-                        }
-                    })
-                    .catch(err => {
-                        window.location.href = '/dashboard';
-                    });
-                },
-                "theme": {
-                    "color": "#4f46e5"
+            try {
+                const res = await fetch('/create-order', { method: 'POST' });
+                const orderData = await res.json();
+
+                if (!orderData.orderId) {
+                    alert('Order ID ರಚಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ!');
+                    btn.innerText = "₹199 ಪಾವತಿಸಿ ಅಪ್‌ಗ್ರೇಡ್ ಮಾಡಿ";
+                    btn.disabled = false;
+                    return;
                 }
-            };
 
-            var rzp1 = new Razorpay(options);
-            
-            rzp1.on('payment.failed', function (response){
-                alert('ಪಾವತಿ ವಿಫಲವಾಗಿದೆ: ' + response.error.description);
-            });
+                var options = {
+                    "key": "rzp_test_TsyKVhtJy6q6B5",
+                    "amount": 19900,
+                    "currency": "INR",
+                    "name": "Uptime Monitor",
+                    "description": "Pro Plan Subscription",
+                    "order_id": orderData.orderId,
+                    "handler": function (response){
+                        fetch('/razorpay-success', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                payment_id: response.razorpay_payment_id,
+                                order_id: response.razorpay_order_id
+                            })
+                        }).then(r => r.json()).then(data => {
+                            if(data.success) {
+                                alert('ಅಭಿನಂದನೆಗಳು! ಪಾವತಿ ಯಶಸ್ವಿಯಾಗಿದೆ. ನಿಮ್ಮ ಖಾತೆಯನ್ನು PRO ಪ್ಲಾನ್‌ಗೆ ಅಪ್‌ಗ್ರೇಡ್ ಮಾಡಲಾಗಿದೆ.');
+                                window.location.href = '/dashboard';
+                            }
+                        });
+                    },
+                    "modal": {
+                        "ondismiss": function() {
+                            btn.innerText = "₹199 ಪಾವತಿಸಿ ಅಪ್‌ಗ್ರೇಡ್ ಮಾಡಿ";
+                            btn.disabled = false;
+                        }
+                    },
+                    "theme": {
+                        "color": "#4f46e5"
+                    }
+                };
 
-            rzp1.open();
-        }
+                var rzp1 = new Razorpay(options);
+                rzp1.open();
+            } catch (err) {
+                alert('ದೋಷ ಎದುರಾಗಿದೆ, ದಯವಿಟ್ಟು ಪುನಃ ಪ್ರಯತ್ನಿಸಿ.');
+                btn.innerText = "₹199 ಪಾವತಿಸಿ ಅಪ್‌ಗ್ರೇಡ್ ಮಾಡಿ";
+                btn.disabled = false;
+            }
+        };
     </script>
 </body>
 </html>
