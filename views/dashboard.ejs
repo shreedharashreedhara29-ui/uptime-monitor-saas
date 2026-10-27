@@ -2,173 +2,381 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Uptime Monitor</title>
-    <!-- ಪ್ರತಿ 15 ಸೆಕೆಂಡಿಗೆ ಆಟೋ ರಿಫ್ರೆಶ್ -->
-    <meta http-equiv="refresh" content="15">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dashboard - Uptime Monitor SaaS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #4f46e5;
-            --primary-hover: #4338ca;
-            --bg: #f8fafc;
-            --card-bg: #ffffff;
-            --text-main: #0f172a;
-            --text-muted: #64748b;
-            --border: #e2e8f0;
+            --bg-body: #090d16;
+            --bg-card: #111827;
+            --bg-card-hover: #172033;
+            --border: #1f293d;
+            --border-light: #2d3b55;
+            --primary: #6366f1;
+            --primary-glow: rgba(99, 102, 241, 0.2);
+            --ultra: #ec4899;
+            --ultra-glow: rgba(236, 72, 153, 0.25);
             --success: #10b981;
+            --success-bg: rgba(16, 185, 129, 0.12);
             --danger: #ef4444;
+            --danger-bg: rgba(239, 68, 68, 0.12);
             --warning: #f59e0b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
         }
+
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
         }
+
         body {
-            background-color: var(--bg);
+            background-color: var(--bg-body);
             color: var(--text-main);
-            padding: 24px 16px;
-        }
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-        }
-        .navbar {
+            min-height: 100vh;
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* Top Navigation */
+        .navbar {
+            background-color: rgba(17, 24, 39, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            padding: 14px 24px;
+            display: flex;
             align-items: center;
-            background: var(--card-bg);
-            padding: 16px 24px;
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            margin-bottom: 24px;
-            flex-wrap: wrap;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 19px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            color: #ffffff;
+            text-decoration: none;
+        }
+
+        .brand-icon {
+            width: 34px;
+            height: 34px;
+            background: linear-gradient(135deg, #6366f1, #ec4899);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 900;
+            font-size: 16px;
+            box-shadow: 0 4px 12px var(--primary-glow);
+        }
+
+        .user-nav {
+            display: flex;
+            align-items: center;
             gap: 12px;
         }
-        .logo {
-            font-size: 20px;
+
+        .user-email {
+            font-size: 13px;
+            color: var(--text-muted);
+            display: none;
+        }
+
+        @media (min-width: 640px) {
+            .user-email { display: inline-block; }
+        }
+
+        .plan-badge {
+            padding: 5px 12px;
+            border-radius: 9999px;
+            font-size: 11px;
             font-weight: 700;
-            color: var(--primary);
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
+        }
+
+        .plan-badge.FREE {
+            background: #1e293b;
+            color: #94a3b8;
+            border: 1px solid var(--border);
+        }
+
+        .plan-badge.PRO {
+            background: rgba(99, 102, 241, 0.15);
+            color: #818cf8;
+            border: 1px solid #4f46e5;
+            box-shadow: 0 0 12px rgba(99, 102, 241, 0.25);
+        }
+
+        .plan-badge.ULTRA_PRO {
+            background: rgba(236, 72, 153, 0.18);
+            color: #f472b6;
+            border: 1px solid #db2777;
+            box-shadow: 0 0 16px var(--ultra-glow);
+        }
+
+        .btn-nav-upgrade {
+            background: linear-gradient(135deg, #ec4899, #8b5cf6);
+            color: white;
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: opacity 0.2s;
+        }
+
+        .btn-nav-upgrade:hover {
+            opacity: 0.9;
+        }
+
+        .btn-logout {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .btn-logout:hover {
+            color: #ffffff;
+            border-color: #64748b;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1120px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 24px 16px;
+            flex: 1;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+
+        @media (min-width: 768px) {
+            .stats-grid {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 18px;
+            }
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 18px;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .stat-card:hover {
+            border-color: var(--border-light);
+            transform: translateY(-2px);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+
+        .stat-value {
+            font-size: 26px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .stat-online { color: var(--success); }
+        .stat-down { color: var(--danger); }
+        .stat-speed { color: #38bdf8; }
+
+        /* Add Monitor Form */
+        .card-add {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        .card-title {
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 14px;
             display: flex;
             align-items: center;
             gap: 8px;
         }
-        .user-info {
+
+        .form-row {
             display: flex;
-            align-items: center;
-            gap: 12px;
+            gap: 10px;
+            flex-direction: column;
         }
-        .plan-badge {
-            background-color: #e0e7ff;
-            color: var(--primary);
-            font-size: 12px;
-            font-weight: 700;
-            padding: 4px 10px;
-            border-radius: 9999px;
-            letter-spacing: 0.5px;
+
+        @media (min-width: 640px) {
+            .form-row { flex-direction: row; }
         }
-        .btn-upgrade {
-            background-color: #4f46e5;
-            color: #ffffff;
-            text-decoration: none;
-            padding: 5px 12px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 700;
-            transition: background 0.2s;
-        }
-        .btn-upgrade:hover {
-            background-color: #4338ca;
-        }
-        .btn-logout {
-            background-color: #fee2e2;
-            color: var(--danger);
-            text-decoration: none;
-            padding: 6px 14px;
-            border-radius: 6px;
-            font-size: 13px;
-            font-weight: 600;
-            transition: background 0.2s;
-        }
-        .btn-logout:hover {
-            background-color: #fecaca;
-        }
-        .card {
-            background: var(--card-bg);
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            padding: 24px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            margin-bottom: 24px;
-        }
-        .card-title {
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 16px;
-            color: var(--text-main);
-        }
-        .add-form {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-        .add-input {
+
+        .input-url {
             flex: 1;
-            min-width: 250px;
-            padding: 12px 16px;
+            background: #0b1120;
             border: 1px solid var(--border);
-            border-radius: 8px;
+            color: var(--text-main);
+            padding: 12px 16px;
+            border-radius: 10px;
             font-size: 14px;
             outline: none;
             transition: border-color 0.2s;
         }
-        .add-input:focus {
+
+        .input-url:focus {
             border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-glow);
         }
-        .btn-submit {
-            background-color: var(--primary);
+
+        .btn-add {
+            background: var(--primary);
             color: white;
             border: none;
-            border-radius: 8px;
             padding: 12px 24px;
+            border-radius: 10px;
             font-size: 14px;
-            font-weight: 600;
+            font-weight: 700;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: background-color 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
-        .btn-submit:hover {
-            background-color: var(--primary-hover);
+
+        .btn-add:hover {
+            background: #4f46e5;
         }
-        .table-responsive {
+
+        /* Monitor Table */
+        .table-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .table-header-box {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .table-title {
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        .live-tag {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: var(--success);
+            font-weight: 600;
+        }
+
+        .pulse-circle {
+            width: 8px;
+            height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+            animation: pulse 1.6s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+
+        .table-container {
+            width: 100%;
             overflow-x: auto;
         }
+
         table {
             width: 100%;
             border-collapse: collapse;
             text-align: left;
         }
+
         th {
-            background-color: #f1f5f9;
+            background: #0e1526;
             color: var(--text-muted);
             font-size: 12px;
-            font-weight: 600;
+            font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            padding: 12px 16px;
+            letter-spacing: 0.6px;
+            padding: 14px 20px;
             border-bottom: 1px solid var(--border);
         }
+
         td {
-            padding: 16px;
-            font-size: 14px;
+            padding: 16px 20px;
             border-bottom: 1px solid var(--border);
+            font-size: 14px;
             vertical-align: middle;
         }
+
         tr:last-child td {
             border-bottom: none;
         }
-        .status-badge {
+
+        tr:hover td {
+            background: var(--bg-card-hover);
+        }
+
+        .site-url-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            color: #ffffff;
+            text-decoration: none;
+        }
+
+        .site-url-box:hover {
+            color: #818cf8;
+        }
+
+        .badge-status {
             display: inline-flex;
             align-items: center;
             gap: 6px;
@@ -177,136 +385,216 @@
             font-size: 12px;
             font-weight: 700;
         }
-        .status-up {
-            background-color: #dcfce7;
-            color: #15803d;
+
+        .badge-up {
+            background: var(--success-bg);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.3);
         }
-        .status-down {
-            background-color: #fee2e2;
-            color: #b91c1c;
+
+        .badge-down {
+            background: var(--danger-bg);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.3);
         }
-        .status-checking {
-            background-color: #fef3c7;
-            color: #b45309;
+
+        .badge-checking {
+            background: rgba(245, 158, 11, 0.12);
+            color: #fbbf24;
+            border: 1px solid rgba(245, 158, 11, 0.3);
         }
-        .url-link {
-            color: var(--text-main);
-            text-decoration: none;
-            font-weight: 500;
-            word-break: break-all;
-        }
-        .url-link:hover {
-            color: var(--primary);
-        }
-        .latency-text {
+
+        .latency-pill {
+            font-size: 13px;
             font-weight: 600;
-            color: var(--text-main);
+            padding: 2px 8px;
+            border-radius: 4px;
+            background: #1a2438;
         }
+
+        .latency-fast { color: #34d399; }
+        .latency-med { color: #fbbf24; }
+        .latency-slow { color: #f87171; }
+
         .time-text {
             color: var(--text-muted);
-            font-size: 13px;
+            font-size: 12px;
         }
+
         .btn-delete {
-            background: none;
-            border: 1px solid #fca5a5;
-            color: var(--danger);
+            background: transparent;
+            border: 1px solid var(--border);
+            color: #ef4444;
             padding: 6px 12px;
             border-radius: 6px;
-            cursor: pointer;
             font-size: 12px;
             font-weight: 600;
+            cursor: pointer;
             transition: all 0.2s;
         }
+
         .btn-delete:hover {
-            background-color: var(--danger);
-            color: white;
+            background: var(--danger-bg);
+            border-color: #ef4444;
         }
+
         .empty-state {
+            padding: 48px 16px;
             text-align: center;
-            padding: 40px 16px;
             color: var(--text-muted);
-            font-size: 14px;
+        }
+
+        .empty-icon {
+            font-size: 36px;
+            margin-bottom: 12px;
+            opacity: 0.6;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- ನ್ಯಾವಿಗೇಷನ್ ಬಾರ್ -->
-        <div class="navbar">
-            <div class="logo">
-                <span>⚡ Uptime Monitor</span>
+
+    <!-- Header Navigation -->
+    <header class="navbar">
+        <a href="/dashboard" class="brand">
+            <div class="brand-icon">⚡</div>
+            <span>Uptime Monitor</span>
+        </a>
+        <div class="user-nav">
+            <span class="user-email"><%= user.email %></span>
+            <span class="plan-badge <%= user.plan %>"><%= user.plan.replace('_', ' ') %></span>
+            <% if (user.plan !== 'ULTRA_PRO') { %>
+                <a href="/upgrade" class="btn-nav-upgrade">⚡ Upgrade</a>
+            <% } %>
+            <a href="/logout" class="btn-logout">Logout</a>
+        </div>
+    </header>
+
+    <main class="container">
+        
+        <!-- Quick Stats Cards Calculation -->
+        <%
+            let totalCount = websites.length;
+            let onlineCount = websites.filter(s => s.status === 'UP').length;
+            let downCount = websites.filter(s => s.status === 'DOWN').length;
+            let totalLatency = websites.reduce((acc, s) => acc + (s.latency || 0), 0);
+            let avgLatency = totalCount > 0 ? Math.round(totalLatency / totalCount) : 0;
+        %>
+
+        <!-- 4 Stats Analytics Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Total Monitors</div>
+                <div class="stat-value"><%= totalCount %></div>
             </div>
-            <div class="user-info">
-                <span><%= user.email %></span>
-                <span class="plan-badge"><%= user.plan ? user.plan + ' PLAN' : 'FREE PLAN' %></span>
-                <a href="/upgrade" class="btn-upgrade">⚡ Upgrade</a>
-                <a href="/logout" class="btn-logout">Logout</a>
+            <div class="stat-card">
+                <div class="stat-label">Monitors Online</div>
+                <div class="stat-value stat-online"><%= onlineCount %></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Monitors Down</div>
+                <div class="stat-value stat-down"><%= downCount %></div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Avg Latency</div>
+                <div class="stat-value stat-speed"><%= avgLatency %><span style="font-size: 14px; font-weight: 500; color: #94a3b8;">ms</span></div>
             </div>
         </div>
 
-        <!-- ಹೊಸ ವೆಬ್‌ಸೈಟ್ ಸೇರಿಸುವ ಕಾರ್ಡ್ -->
-        <div class="card">
-            <h3 class="card-title">Add Website to Monitor</h3>
-            <form action="/add-website" method="POST" class="add-form">
-                <input type="url" name="url" class="add-input" placeholder="https://example.com" required>
-                <button type="submit" class="btn-submit">+ Add Monitor</button>
+        <!-- Add Monitor Form -->
+        <section class="card-add">
+            <h2 class="card-title">🌐 Add New Website</h2>
+            <form action="/add-website" method="POST" class="form-row">
+                <input type="url" name="url" class="input-url" placeholder="https://yourwebsite.com" required>
+                <button type="submit" class="btn-add">
+                    <span>+</span> Monitor Website
+                </button>
             </form>
-        </div>
+        </section>
 
-        <!-- ಮಾನಿಟರ್ ಮಾಡಲಾಗುತ್ತಿರುವ ವೆಬ್‌ಸೈಟ್‌ಗಳ ಪಟ್ಟಿ -->
-        <div class="card">
-            <h3 class="card-title">Monitored Websites</h3>
-            <div class="table-responsive">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Website URL</th>
-                            <th>Status</th>
-                            <th>Response Time</th>
-                            <th>Last Checked</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <% if (websites && websites.length > 0) { %>
+        <!-- Monitored Websites Table -->
+        <section class="table-card">
+            <div class="table-header-box">
+                <h3 class="table-title">Live Websites Status</h3>
+                <div class="live-tag">
+                    <div class="pulse-circle"></div>
+                    <span>Real-time Active</span>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <% if (websites.length === 0) { %>
+                    <div class="empty-state">
+                        <div class="empty-icon">📡</div>
+                        <p style="font-weight: 600; font-size: 15px; margin-bottom: 4px;">No monitors created yet</p>
+                        <p style="font-size: 13px;">Add your first website above to initiate 24/7 automated monitoring.</p>
+                    </div>
+                <% } else { %>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Target URL</th>
+                                <th>Current Status</th>
+                                <th>Response Time</th>
+                                <th>Last Checked</th>
+                                <th style="text-align: right;">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
                             <% websites.forEach(site => { %>
                                 <tr>
                                     <td>
-                                        <a href="<%= site.url %>" target="_blank" class="url-link"><%= site.url %></a>
+                                        <a href="<%= site.url %>" target="_blank" class="site-url-box">
+                                            <%= site.url %>
+                                        </a>
                                     </td>
                                     <td>
                                         <% if (site.status === 'UP') { %>
-                                            <span class="status-badge status-up">● UP</span>
+                                            <span class="badge-status badge-up">● UP</span>
                                         <% } else if (site.status === 'DOWN') { %>
-                                            <span class="status-badge status-down">● DOWN</span>
+                                            <span class="badge-status badge-down">● DOWN</span>
                                         <% } else { %>
-                                            <span class="status-badge status-checking">● <%= site.status || 'Checking...' %></span>
+                                            <span class="badge-status badge-checking">○ Checking</span>
                                         <% } %>
                                     </td>
                                     <td>
-                                        <span class="latency-text"><%= site.latency ? site.latency + ' ms' : '-' %></span>
+                                        <% 
+                                            let latClass = 'latency-fast';
+                                            if (site.latency > 500) latClass = 'latency-slow';
+                                            else if (site.latency > 200) latClass = 'latency-med';
+                                        %>
+                                        <span class="latency-pill <%= latClass %>"><%= site.latency || 0 %> ms</span>
                                     </td>
                                     <td>
                                         <span class="time-text"><%= site.lastChecked || 'Just now' %></span>
                                     </td>
-                                    <td>
-                                        <form action="/delete-website/<%= site.id %>" method="POST" style="margin: 0;">
+                                    <td style="text-align: right;">
+                                        <form action="/delete-website/<%= site.id %>" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to stop monitoring this site?');">
                                             <button type="submit" class="btn-delete">Delete</button>
                                         </form>
                                     </td>
                                 </tr>
                             <% }) %>
-                        <% } else { %>
-                            <tr>
-                                <td colspan="5" class="empty-state">
-                                    No websites added yet. Add a website above to start monitoring.
-                                </td>
-                            </tr>
-                        <% } %>
-                    </tbody>
-                </table>
+                        </tbody>
+                    </table>
+                <% } %>
             </div>
-        </div>
-    </div>
+        </section>
+
+    </main>
+
+    <!-- Auto Refresh Script for Realtime Accuracy -->
+    <script>
+        // ULTRA PRO ಆಗಿದ್ದರೆ ಪ್ರತಿ 5 ಸೆಕೆಂಡಿಗೆ, ಇಲ್ಲದಿದ್ದರೆ ಪ್ರತಿ 20 ಸೆಕೆಂಡಿಗೆ ಹಿನ್ನೆಲೆಯಲ್ಲಿ ರಿಫ್ರೆಶ್ ಆಗುತ್ತದೆ
+        const isUltra = '<%= user.plan %>' === 'ULTRA_PRO';
+        const refreshInterval = isUltra ? 5000 : 20000;
+
+        setInterval(() => {
+            // ಇನ್ಪುಟ್ ಬಾಕ್ಸ್‌ನಲ್ಲಿ ಟೈಪ್ ಮಾಡುತ್ತಿಲ್ಲದಿದ್ದರೆ ಮಾತ್ರ ರಿಫ್ರೆಶ್ ಮಾಡು
+            const activeInput = document.activeElement.tagName === 'INPUT';
+            if (!activeInput) {
+                window.location.reload();
+            }
+        }, refreshInterval);
+    </script>
 </body>
 </html>
