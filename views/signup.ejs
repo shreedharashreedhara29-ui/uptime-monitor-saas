@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Sign Up - Uptime Monitor</title>
     <style>
         :root {
@@ -28,36 +28,36 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            padding: 24px 16px;
+            padding: 16px;
         }
         .auth-card {
             background: var(--card-bg);
             border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 32px;
-            max-width: 440px;
+            border-radius: 16px;
+            padding: 24px;
             width: 100%;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            max-width: 420px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
         }
         .logo {
             text-align: center;
-            font-size: 24px;
+            font-size: 22px;
             font-weight: 700;
             color: var(--primary);
-            margin-bottom: 6px;
+            margin-bottom: 4px;
         }
         .subtitle {
             text-align: center;
             color: var(--text-muted);
-            font-size: 14px;
+            font-size: 13px;
             margin-bottom: 20px;
         }
         .error-box {
             background-color: #fee2e2;
             color: var(--danger);
-            padding: 10px 14px;
-            border-radius: 6px;
-            font-size: 14px;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 13px;
             margin-bottom: 16px;
             text-align: center;
         }
@@ -72,12 +72,13 @@
         }
         input {
             width: 100%;
-            padding: 10px 12px;
+            padding: 12px;
             border: 1px solid var(--border);
-            border-radius: 6px;
-            font-size: 14px;
+            border-radius: 8px;
+            font-size: 15px;
             outline: none;
             transition: border-color 0.2s;
+            -webkit-appearance: none;
         }
         input:focus {
             border-color: var(--primary);
@@ -92,8 +93,8 @@
             background-color: var(--primary);
             color: white;
             border: none;
-            padding: 12px;
-            border-radius: 6px;
+            padding: 14px;
+            border-radius: 8px;
             font-size: 15px;
             font-weight: 600;
             cursor: pointer;
@@ -106,16 +107,13 @@
         .auth-footer {
             margin-top: 18px;
             text-align: center;
-            font-size: 14px;
+            font-size: 13px;
             color: var(--text-muted);
         }
         .auth-footer a {
             color: var(--primary);
             text-decoration: none;
             font-weight: 600;
-        }
-        .auth-footer a:hover {
-            text-decoration: underline;
         }
     </style>
 </head>
@@ -151,7 +149,7 @@
             </div>
 
             <div class="form-group">
-                <label for="confirmPassword">ಪಾಸ್‌ವರ್ಡ್ ದೃಢೀಕರಿಸಿ (Confirm Password)</label>
+                <label for="confirmPassword">ಪಾಸ್‌ವರ್ಡ್ ದೃಢೀಕರಿಸಿ</label>
                 <input type="password" id="confirmPassword" name="confirmPassword" placeholder="••••••••" required>
             </div>
 
