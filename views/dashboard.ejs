@@ -2,599 +2,307 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dashboard - Uptime Monitor SaaS</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pingbaba - Website Uptime & WhatsApp Alert System</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%232563eb'/><path d='M25 55 L40 70 L75 35' stroke='white' stroke-width='10' fill='none' stroke-linecap='round'/></svg>">
     <style>
-        :root {
-            --bg-body: #090d16;
-            --bg-card: #111827;
-            --bg-card-hover: #172033;
-            --border: #1f293d;
-            --border-light: #2d3b55;
-            --primary: #6366f1;
-            --primary-glow: rgba(99, 102, 241, 0.2);
-            --ultra: #ec4899;
-            --ultra-glow: rgba(236, 72, 153, 0.25);
-            --success: #10b981;
-            --success-bg: rgba(16, 185, 129, 0.12);
-            --danger: #ef4444;
-            --danger-bg: rgba(239, 68, 68, 0.12);
-            --warning: #f59e0b;
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-        }
-
         * {
-            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         }
-
         body {
-            background-color: var(--bg-body);
-            color: var(--text-main);
+            background-color: #0b132b;
+            color: #ffffff;
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow-x: hidden;
+            padding: 24px;
         }
-
-        /* Top Navigation */
-        .navbar {
-            background-color: rgba(17, 24, 39, 0.85);
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid var(--border);
-            padding: 14px 24px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 19px;
-            font-weight: 800;
-            letter-spacing: -0.5px;
-            color: #ffffff;
-            text-decoration: none;
-        }
-
-        .brand-icon {
-            width: 34px;
-            height: 34px;
-            background: linear-gradient(135deg, #6366f1, #ec4899);
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 900;
-            font-size: 16px;
-            box-shadow: 0 4px 12px var(--primary-glow);
-        }
-
-        .user-nav {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .user-email {
-            font-size: 13px;
-            color: var(--text-muted);
-            display: none;
-        }
-
-        @media (min-width: 640px) {
-            .user-email { display: inline-block; }
-        }
-
-        .plan-badge {
-            padding: 5px 12px;
-            border-radius: 9999px;
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 0.6px;
-            text-transform: uppercase;
-        }
-
-        .plan-badge.FREE {
-            background: #1e293b;
-            color: #94a3b8;
-            border: 1px solid var(--border);
-        }
-
-        .plan-badge.PRO {
-            background: rgba(99, 102, 241, 0.15);
-            color: #818cf8;
-            border: 1px solid #4f46e5;
-            box-shadow: 0 0 12px rgba(99, 102, 241, 0.25);
-        }
-
-        .plan-badge.ULTRA_PRO {
-            background: rgba(236, 72, 153, 0.18);
-            color: #f472b6;
-            border: 1px solid #db2777;
-            box-shadow: 0 0 16px var(--ultra-glow);
-        }
-
-        .btn-nav-upgrade {
-            background: linear-gradient(135deg, #ec4899, #8b5cf6);
-            color: white;
-            padding: 6px 14px;
-            border-radius: 8px;
-            font-size: 12px;
-            font-weight: 700;
-            text-decoration: none;
-            transition: opacity 0.2s;
-        }
-
-        .btn-nav-upgrade:hover {
-            opacity: 0.9;
-        }
-
-        .btn-logout {
-            background: transparent;
-            border: 1px solid var(--border);
-            color: var(--text-muted);
-            padding: 6px 12px;
-            border-radius: 8px;
-            font-size: 12px;
-            text-decoration: none;
-            transition: all 0.2s;
-        }
-
-        .btn-logout:hover {
-            color: #ffffff;
-            border-color: #64748b;
-        }
-
-        /* Container */
         .container {
-            max-width: 1120px;
-            width: 100%;
+            max-width: 1200px;
             margin: 0 auto;
-            padding: 24px 16px;
-            flex: 1;
         }
-
-        /* Stats Cards */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 14px;
-            margin-bottom: 24px;
-        }
-
-        @media (min-width: 768px) {
-            .stats-grid {
-                grid-template-columns: repeat(4, 1fr);
-                gap: 18px;
-            }
-        }
-
-        .stat-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            padding: 18px;
-            position: relative;
-            overflow: hidden;
-            transition: transform 0.2s, border-color 0.2s;
-        }
-
-        .stat-card:hover {
-            border-color: var(--border-light);
-            transform: translateY(-2px);
-        }
-
-        .stat-label {
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 6px;
-        }
-
-        .stat-value {
-            font-size: 26px;
-            font-weight: 800;
-            letter-spacing: -0.5px;
-        }
-
-        .stat-online { color: var(--success); }
-        .stat-down { color: var(--danger); }
-        .stat-speed { color: #38bdf8; }
-
-        /* Add Monitor Form */
-        .card-add {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 20px;
-            margin-bottom: 24px;
-        }
-
-        .card-title {
-            font-size: 15px;
-            font-weight: 700;
-            margin-bottom: 14px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .form-row {
-            display: flex;
-            gap: 10px;
-            flex-direction: column;
-        }
-
-        @media (min-width: 640px) {
-            .form-row { flex-direction: row; }
-        }
-
-        .input-url {
-            flex: 1;
-            background: #0b1120;
-            border: 1px solid var(--border);
-            color: var(--text-main);
-            padding: 12px 16px;
-            border-radius: 10px;
-            font-size: 14px;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-
-        .input-url:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px var(--primary-glow);
-        }
-
-        .btn-add {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 10px;
-            font-size: 14px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: background-color 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .btn-add:hover {
-            background: #4f46e5;
-        }
-
-        /* Monitor Table */
-        .table-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            overflow: hidden;
-        }
-
-        .table-header-box {
-            padding: 16px 20px;
-            border-bottom: 1px solid var(--border);
+        
+        /* ಹೊಸ ಆಧುನಿಕ ಹೆಡರ್ ಮತ್ತು ಲೋಗೋ ವಿನ್ಯಾಸ */
+        header {
             display: flex;
             align-items: center;
             justify-content: space-between;
+            padding-bottom: 24px;
+            border-bottom: 1px solid #1c2541;
+            margin-bottom: 30px;
         }
-
-        .table-title {
-            font-size: 15px;
-            font-weight: 700;
-        }
-
-        .live-tag {
+        .brand-section {
             display: flex;
             align-items: center;
-            gap: 6px;
-            font-size: 12px;
-            color: var(--success);
-            font-weight: 600;
+            gap: 14px;
         }
-
-        .pulse-circle {
+        .logo-box {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, #2563eb, #38bdf8);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+        }
+        .brand-text h1 {
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .brand-text h1 span {
+            color: #38bdf8;
+        }
+        .brand-text p {
+            font-size: 13px;
+            color: #94a3b8;
+            margin-top: 2px;
+        }
+        .system-badge {
+            background: rgba(34, 197, 94, 0.1);
+            color: #4ade80;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            border: 1px solid rgba(74, 222, 128, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .status-dot {
             width: 8px;
             height: 8px;
-            background: var(--success);
+            background-color: #4ade80;
             border-radius: 50%;
-            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
-            animation: pulse 1.6s infinite;
+            display: inline-block;
+            box-shadow: 0 0 8px #4ade80;
         }
 
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
-            70% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        /* ಡ್ಯಾಶ್‌ಬೋರ್ಡ್ ಲೇಔಟ್ */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 340px 1fr;
+            gap: 24px;
+        }
+        @media (max-width: 900px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        .card {
+            background-color: #111d42;
+            border: 1px solid #1c2541;
+            border-radius: 14px;
+            padding: 24px;
+        }
+        .card h2 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            font-weight: 600;
         }
 
-        .table-container {
+        /* ಫಾರ್ಮ್ ಎಲಿಮೆಂಟ್ಸ್ */
+        .form-group {
+            margin-bottom: 16px;
+        }
+        label {
+            display: block;
+            font-size: 13px;
+            color: #94a3b8;
+            margin-bottom: 6px;
+        }
+        input {
             width: 100%;
-            overflow-x: auto;
+            padding: 10px 14px;
+            background-color: #0b132b;
+            border: 1px solid #233560;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 14px;
+            outline: none;
+        }
+        input:focus {
+            border-color: #38bdf8;
+        }
+        .btn-submit {
+            width: 100%;
+            padding: 11px;
+            background: #2563eb;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 8px;
+        }
+        .btn-submit:hover {
+            background: #1d4ed8;
         }
 
+        /* ಟೇಬಲ್ */
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .btn-refresh {
+            background: none;
+            border: none;
+            color: #38bdf8;
+            cursor: pointer;
+            font-size: 13px;
+        }
         table {
             width: 100%;
             border-collapse: collapse;
-            text-align: left;
-        }
-
-        th {
-            background: #0e1526;
-            color: var(--text-muted);
-            font-size: 12px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.6px;
-            padding: 14px 20px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        td {
-            padding: 16px 20px;
-            border-bottom: 1px solid var(--border);
             font-size: 14px;
+        }
+        th {
+            text-align: left;
+            padding: 12px 10px;
+            color: #64748b;
+            font-weight: 600;
+            font-size: 12px;
+            border-bottom: 1px solid #1c2541;
+        }
+        td {
+            padding: 14px 10px;
+            border-bottom: 1px solid #1c2541;
             vertical-align: middle;
         }
-
-        tr:last-child td {
-            border-bottom: none;
-        }
-
-        tr:hover td {
-            background: var(--bg-card-hover);
-        }
-
-        .site-url-box {
-            display: flex;
-            align-items: center;
-            gap: 10px;
+        .site-name {
             font-weight: 600;
-            color: #ffffff;
-            text-decoration: none;
+            color: #fff;
         }
-
-        .site-url-box:hover {
-            color: #818cf8;
+        .site-url {
+            font-size: 12px;
+            color: #64748b;
         }
-
         .badge-status {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
             padding: 4px 10px;
             border-radius: 6px;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 700;
+            display: inline-block;
         }
-
         .badge-up {
-            background: var(--success-bg);
-            color: #34d399;
-            border: 1px solid rgba(16, 185, 129, 0.3);
+            background: rgba(34, 197, 94, 0.15);
+            color: #4ade80;
         }
-
+        .badge-pending {
+            background: rgba(234, 179, 8, 0.15);
+            color: #facc15;
+        }
         .badge-down {
-            background: var(--danger-bg);
+            background: rgba(239, 68, 68, 0.15);
             color: #f87171;
-            border: 1px solid rgba(239, 68, 68, 0.3);
         }
-
-        .badge-checking {
-            background: rgba(245, 158, 11, 0.12);
-            color: #fbbf24;
-            border: 1px solid rgba(245, 158, 11, 0.3);
-        }
-
-        .latency-pill {
-            font-size: 13px;
-            font-weight: 600;
-            padding: 2px 8px;
-            border-radius: 4px;
-            background: #1a2438;
-        }
-
-        .latency-fast { color: #34d399; }
-        .latency-med { color: #fbbf24; }
-        .latency-slow { color: #f87171; }
-
-        .time-text {
-            color: var(--text-muted);
-            font-size: 12px;
-        }
-
         .btn-delete {
-            background: transparent;
-            border: 1px solid var(--border);
             color: #ef4444;
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 600;
+            background: none;
+            border: none;
             cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .btn-delete:hover {
-            background: var(--danger-bg);
-            border-color: #ef4444;
-        }
-
-        .empty-state {
-            padding: 48px 16px;
-            text-align: center;
-            color: var(--text-muted);
-        }
-
-        .empty-icon {
-            font-size: 36px;
-            margin-bottom: 12px;
-            opacity: 0.6;
+            font-size: 13px;
         }
     </style>
 </head>
 <body>
-
-    <% 
-        const userPlan = (user && user.plan) ? user.plan : 'FREE';
-        const userEmail = (user && user.email) ? user.email : 'User';
-        const siteList = Array.isArray(websites) ? websites : [];
-
-        let totalCount = siteList.length;
-        let onlineCount = siteList.filter(s => s.status === 'UP').length;
-        let downCount = siteList.filter(s => s.status === 'DOWN').length;
-        let totalLatency = siteList.reduce((acc, s) => acc + (s.latency || 0), 0);
-        let avgLatency = totalCount > 0 ? Math.round(totalLatency / totalCount) : 0;
-    %>
-
-    <!-- Header Navigation -->
-    <header class="navbar">
-        <a href="/dashboard" class="brand">
-            <div class="brand-icon">⚡</div>
-            <span>Uptime Monitor</span>
-        </a>
-        <div class="user-nav">
-            <span class="user-email"><%= userEmail %></span>
-            <span class="plan-badge <%= userPlan %>"><%= userPlan.replace('_', ' ') %></span>
-            <% if (userPlan !== 'ULTRA_PRO') { %>
-                <a href="/upgrade" class="btn-nav-upgrade">⚡ Upgrade</a>
-            <% } %>
-            <a href="/logout" class="btn-logout">Logout</a>
-        </div>
-    </header>
-
-    <main class="container">
-
-        <!-- 4 Stats Analytics Cards -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-label">Total Monitors</div>
-                <div class="stat-value"><%= totalCount %></div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">Monitors Online</div>
-                <div class="stat-value stat-online"><%= onlineCount %></div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">Monitors Down</div>
-                <div class="stat-value stat-down"><%= downCount %></div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">Avg Latency</div>
-                <div class="stat-value stat-speed"><%= avgLatency %><span style="font-size: 14px; font-weight: 500; color: #94a3b8;">ms</span></div>
-            </div>
-        </div>
-
-        <!-- Add Monitor Form -->
-        <section class="card-add">
-            <h2 class="card-title">🌐 Add New Website</h2>
-            <form action="/add-website" method="POST" class="form-row">
-                <input type="url" name="url" class="input-url" placeholder="https://yourwebsite.com" required>
-                <button type="submit" class="btn-add">
-                    <span>+</span> Monitor Website
-                </button>
-            </form>
-        </section>
-
-        <!-- Monitored Websites Table -->
-        <section class="table-card">
-            <div class="table-header-box">
-                <h3 class="table-title">Live Websites Status</h3>
-                <div class="live-tag">
-                    <div class="pulse-circle"></div>
-                    <span>Real-time Active</span>
+    <div class="container">
+        <!-- ಹೊಸ ಲೋಗೋ ಮತ್ತು ಹೆಡರ್ -->
+        <header>
+            <div class="brand-section">
+                <div class="logo-box">🔔</div>
+                <div class="brand-text">
+                    <h1>Ping<span>baba</span></h1>
+                    <p>24x7 Website Uptime & WhatsApp Alert System</p>
                 </div>
             </div>
+            <div class="system-badge">
+                <span class="status-dot"></span> System Active
+            </div>
+        </header>
 
-            <div class="table-container">
-                <% if (siteList.length === 0) { %>
-                    <div class="empty-state">
-                        <div class="empty-icon">📡</div>
-                        <p style="font-weight: 600; font-size: 15px; margin-bottom: 4px;">No monitors created yet</p>
-                        <p style="font-size: 13px;">Add your first website above to initiate 24/7 automated monitoring.</p>
+        <!-- ಅಸಲಿ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್ ಫಾರ್ಮ್ ಮತ್ತು ಟೇಬಲ್ -->
+        <div class="dashboard-grid">
+            <div class="card">
+                <h2>Add Website</h2>
+                <form action="/add-website" method="POST">
+                    <div class="form-group">
+                        <label>Website Name</label>
+                        <input type="text" name="name" placeholder="e.g. Google" required>
                     </div>
-                <% } else { %>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Target URL</th>
-                                <th>Current Status</th>
-                                <th>Response Time</th>
-                                <th>Last Checked</th>
-                                <th style="text-align: right;">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <% siteList.forEach(site => { %>
+                    <div class="form-group">
+                        <label>Website URL</label>
+                        <input type="url" name="url" placeholder="https://example.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label>WhatsApp Number</label>
+                        <input type="text" name="phone" placeholder="918618957072" required>
+                    </div>
+                    <button type="submit" class="btn-submit">Start Monitoring</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <div class="table-header">
+                    <h2>Monitored Websites</h2>
+                    <button class="btn-refresh" onclick="location.reload()">Refresh</button>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>WEBSITE</th>
+                            <th>STATUS</th>
+                            <th>LAST CHECKED</th>
+                            <th>ACTION</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (typeof websites !== 'undefined' && websites.length > 0) { %>
+                            <% websites.forEach(function(site) { %>
                                 <tr>
                                     <td>
-                                        <a href="<%= site.url %>" target="_blank" class="site-url-box">
-                                            <%= site.url %>
-                                        </a>
+                                        <div class="site-name"><%= site.name %></div>
+                                        <div class="site-url"><%= site.url %></div>
                                     </td>
                                     <td>
-                                        <% if (site.status === 'UP') { %>
-                                            <span class="badge-status badge-up">● UP</span>
-                                        <% } else if (site.status === 'DOWN') { %>
-                                            <span class="badge-status badge-down">● DOWN</span>
-                                        <% } else { %>
-                                            <span class="badge-status badge-checking">○ Checking</span>
-                                        <% } %>
+                                        <span class="badge-status <%= site.status === 'UP' ? 'badge-up' : (site.status === 'DOWN' ? 'badge-down' : 'badge-pending') %>">
+                                            <%= site.status || 'PENDING' %>
+                                        </span>
                                     </td>
+                                    <td style="color: #94a3b8; font-size: 13px;"><%= site.lastChecked || 'Waiting...' %></td>
                                     <td>
-                                        <% 
-                                            let latClass = 'latency-fast';
-                                            if (site.latency > 500) latClass = 'latency-slow';
-                                            else if (site.latency > 200) latClass = 'latency-med';
-                                        %>
-                                        <span class="latency-pill <%= latClass %>"><%= site.latency || 0 %> ms</span>
-                                    </td>
-                                    <td>
-                                        <span class="time-text"><%= site.lastChecked || 'Just now' %></span>
-                                    </td>
-                                    <td style="text-align: right;">
-                                        <form action="/delete-website/<%= site.id %>" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to stop monitoring this site?');">
+                                        <form action="/delete-website/<%= site.id %>" method="POST" style="display:inline;">
                                             <button type="submit" class="btn-delete">Delete</button>
                                         </form>
                                     </td>
                                 </tr>
-                            <% }) %>
-                        </tbody>
-                    </table>
-                <% } %>
+                            <% }); %>
+                        <% } else { %>
+                            <tr>
+                                <td>
+                                    <div class="site-name">PingBaba</div>
+                                    <div class="site-url">https://example.com</div>
+                                </td>
+                                <td><span class="badge-status badge-pending">PENDING</span></td>
+                                <td style="color: #94a3b8; font-size: 13px;">Waiting...</td>
+                                <td><button class="btn-delete">Delete</button></td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+                </table>
             </div>
-        </section>
-
-    </main>
-
-    <script>
-        const isUltra = '<%= userPlan %>' === 'ULTRA_PRO';
-        const refreshInterval = isUltra ? 5000 : 20000;
-
-        setInterval(() => {
-            const activeInput = document.activeElement && document.activeElement.tagName === 'INPUT';
-            if (!activeInput) {
-                window.location.reload();
-            }
-        }, refreshInterval);
-    </script>
+        </div>
+    </div>
 </body>
 </html>
