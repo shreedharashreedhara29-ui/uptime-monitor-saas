@@ -4,8 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pingbaba - Website Uptime & WhatsApp Alert System</title>
-    <!-- Favicon -->
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%232563eb'/><path d='M25 55 L40 70 L75 35' stroke='white' stroke-width='10' fill='none' stroke-linecap='round'/></svg>">
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <style>
         * {
             margin: 0;
@@ -23,20 +22,18 @@
             max-width: 1200px;
             margin: 0 auto;
         }
-        
-        /* ಹೊಸ ಆಧುನಿಕ ಹೆಡರ್ ಮತ್ತು ಲೋಗೋ ವಿನ್ಯಾಸ */
         header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding-bottom: 24px;
+            padding-bottom: 20px;
             border-bottom: 1px solid #1c2541;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
         }
         .brand-section {
             display: flex;
             align-items: center;
-            gap: 14px;
+            gap: 12px;
         }
         .logo-box {
             width: 44px;
@@ -52,10 +49,6 @@
         .brand-text h1 {
             font-size: 24px;
             font-weight: 800;
-            letter-spacing: -0.5px;
-            display: flex;
-            align-items: center;
-            gap: 4px;
         }
         .brand-text h1 span {
             color: #38bdf8;
@@ -63,55 +56,106 @@
         .brand-text p {
             font-size: 13px;
             color: #94a3b8;
-            margin-top: 2px;
         }
-        .system-badge {
-            background: rgba(34, 197, 94, 0.1);
-            color: #4ade80;
+        .active-plan-badge {
+            background: rgba(56, 189, 248, 0.15);
+            color: #38bdf8;
             padding: 6px 14px;
             border-radius: 20px;
             font-size: 13px;
-            font-weight: 600;
-            border: 1px solid rgba(74, 222, 128, 0.2);
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            font-weight: 700;
+            border: 1px solid rgba(56, 189, 248, 0.3);
         }
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            background-color: #4ade80;
-            border-radius: 50%;
-            display: inline-block;
-            box-shadow: 0 0 8px #4ade80;
+        
+        /* Pricing Cards */
+        .pricing-section-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: #e2e8f0;
+        }
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+        .pricing-card {
+            background: #111d42;
+            border: 1px solid #1c2541;
+            border-radius: 12px;
+            padding: 20px;
+            position: relative;
+        }
+        .pricing-card.current {
+            border-color: #38bdf8;
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.15);
+        }
+        .plan-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+        .plan-price {
+            font-size: 26px;
+            font-weight: 800;
+            color: #38bdf8;
+            margin-bottom: 12px;
+        }
+        .plan-features {
+            list-style: none;
+            margin-bottom: 16px;
+            font-size: 13px;
+            color: #94a3b8;
+        }
+        .plan-features li {
+            margin-bottom: 6px;
+        }
+        .btn-upgrade {
+            width: 100%;
+            padding: 10px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn-upgrade:hover {
+            background: #1d4ed8;
+        }
+        .btn-current {
+            width: 100%;
+            padding: 10px;
+            background: #1e293b;
+            color: #64748b;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: default;
         }
 
-        /* ಡ್ಯಾಶ್‌ಬೋರ್ಡ್ ಲೇಔಟ್ */
+        /* Dashboard UI */
         .dashboard-grid {
             display: grid;
             grid-template-columns: 340px 1fr;
             gap: 24px;
         }
         @media (max-width: 900px) {
-            .dashboard-grid {
-                grid-template-columns: 1fr;
-            }
+            .dashboard-grid { grid-template-columns: 1fr; }
         }
         .card {
             background-color: #111d42;
             border: 1px solid #1c2541;
             border-radius: 14px;
-            padding: 24px;
+            padding: 20px;
         }
         .card h2 {
             font-size: 18px;
-            margin-bottom: 20px;
-            font-weight: 600;
-        }
-
-        /* ಫಾರ್ಮ್ ಎಲಿಮೆಂಟ್ಸ್ */
-        .form-group {
             margin-bottom: 16px;
+        }
+        .form-group {
+            margin-bottom: 14px;
         }
         label {
             display: block;
@@ -121,16 +165,12 @@
         }
         input {
             width: 100%;
-            padding: 10px 14px;
+            padding: 10px 12px;
             background-color: #0b132b;
             border: 1px solid #233560;
             border-radius: 8px;
             color: #fff;
-            font-size: 14px;
             outline: none;
-        }
-        input:focus {
-            border-color: #38bdf8;
         }
         .btn-submit {
             width: 100%;
@@ -139,86 +179,40 @@
             color: #fff;
             border: none;
             border-radius: 8px;
-            font-size: 14px;
             font-weight: 600;
             cursor: pointer;
-            margin-top: 8px;
-        }
-        .btn-submit:hover {
-            background: #1d4ed8;
-        }
-
-        /* ಟೇಬಲ್ */
-        .table-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-        }
-        .btn-refresh {
-            background: none;
-            border: none;
-            color: #38bdf8;
-            cursor: pointer;
-            font-size: 13px;
         }
         table {
             width: 100%;
             border-collapse: collapse;
             font-size: 14px;
         }
-        th {
-            text-align: left;
+        th, td {
             padding: 12px 10px;
-            color: #64748b;
-            font-weight: 600;
-            font-size: 12px;
             border-bottom: 1px solid #1c2541;
+            text-align: left;
         }
-        td {
-            padding: 14px 10px;
-            border-bottom: 1px solid #1c2541;
-            vertical-align: middle;
-        }
-        .site-name {
-            font-weight: 600;
-            color: #fff;
-        }
-        .site-url {
-            font-size: 12px;
-            color: #64748b;
-        }
+        th { color: #64748b; font-size: 12px; }
         .badge-status {
-            padding: 4px 10px;
+            padding: 4px 8px;
             border-radius: 6px;
             font-size: 11px;
             font-weight: 700;
-            display: inline-block;
         }
-        .badge-up {
-            background: rgba(34, 197, 94, 0.15);
-            color: #4ade80;
-        }
-        .badge-pending {
-            background: rgba(234, 179, 8, 0.15);
-            color: #facc15;
-        }
-        .badge-down {
-            background: rgba(239, 68, 68, 0.15);
-            color: #f87171;
-        }
+        .badge-up { background: rgba(34, 197, 94, 0.15); color: #4ade80; }
+        .badge-down { background: rgba(239, 68, 68, 0.15); color: #f87171; }
+        .badge-pending { background: rgba(234, 179, 8, 0.15); color: #facc15; }
         .btn-delete {
             color: #ef4444;
             background: none;
             border: none;
             cursor: pointer;
-            font-size: 13px;
+            font-weight: 600;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- ಹೊಸ ಲೋಗೋ ಮತ್ತು ಹೆಡರ್ -->
         <header>
             <div class="brand-section">
                 <div class="logo-box">🔔</div>
@@ -227,19 +221,83 @@
                     <p>24x7 Website Uptime & WhatsApp Alert System</p>
                 </div>
             </div>
-            <div class="system-badge">
-                <span class="status-dot"></span> System Active
+            <div class="active-plan-badge">
+                Current Plan: <%= userPlan.toUpperCase() %>
             </div>
         </header>
 
-        <!-- ಅಸಲಿ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್ ಫಾರ್ಮ್ ಮತ್ತು ಟೇಬಲ್ -->
+        <div class="pricing-section-title">Subscription Plans</div>
+        <div class="pricing-grid">
+            <!-- Free Plan -->
+            <div class="pricing-card <%= userPlan === 'free' ? 'current' : '' %>">
+                <div class="plan-title">Free</div>
+                <div class="plan-price">₹0</div>
+                <ul class="plan-features">
+                    <li>✓ 1 Website Monitoring</li>
+                    <li>✓ 10 Minutes Check Interval</li>
+                    <li>✓ Standard Alerts</li>
+                </ul>
+                <% if (userPlan === 'free') { %>
+                    <button class="btn-current">Active Plan</button>
+                <% } %>
+            </div>
+
+            <!-- Lite Plan -->
+            <div class="pricing-card <%= userPlan === 'lite' ? 'current' : '' %>">
+                <div class="plan-title">Lite</div>
+                <div class="plan-price">₹199<span style="font-size: 13px; color: #94a3b8;">/mo</span></div>
+                <ul class="plan-features">
+                    <li>✓ 10 Websites Monitoring</li>
+                    <li>✓ 30 Seconds Check Interval</li>
+                    <li>✓ WhatsApp Alerts</li>
+                </ul>
+                <% if (userPlan === 'lite') { %>
+                    <button class="btn-current">Active Plan</button>
+                <% } else { %>
+                    <button class="btn-upgrade" onclick="initiatePayment('lite')">Upgrade to Lite</button>
+                <% } %>
+            </div>
+
+            <!-- Pro Plan -->
+            <div class="pricing-card <%= userPlan === 'pro' ? 'current' : '' %>">
+                <div class="plan-title">Pro</div>
+                <div class="plan-price">₹349<span style="font-size: 13px; color: #94a3b8;">/mo</span></div>
+                <ul class="plan-features">
+                    <li>✓ 25 Websites Monitoring</li>
+                    <li>✓ 15 Seconds Check Interval</li>
+                    <li>✓ Fast WhatsApp Alerts</li>
+                </ul>
+                <% if (userPlan === 'pro') { %>
+                    <button class="btn-current">Active Plan</button>
+                <% } else { %>
+                    <button class="btn-upgrade" onclick="initiatePayment('pro')">Upgrade to Pro</button>
+                <% } %>
+            </div>
+
+            <!-- Ultra Pro Plan -->
+            <div class="pricing-card <%= userPlan === 'ultra_pro' ? 'current' : '' %>">
+                <div class="plan-title">Ultra Pro</div>
+                <div class="plan-price">₹599<span style="font-size: 13px; color: #94a3b8;">/mo</span></div>
+                <ul class="plan-features">
+                    <li>✓ Unlimited Websites</li>
+                    <li>✓ 5 Seconds Turbo Check</li>
+                    <li>✓ Instant Priority WhatsApp</li>
+                </ul>
+                <% if (userPlan === 'ultra_pro') { %>
+                    <button class="btn-current">Active Plan</button>
+                <% } else { %>
+                    <button class="btn-upgrade" onclick="initiatePayment('ultra_pro')">Upgrade to Ultra Pro</button>
+                <% } %>
+            </div>
+        </div>
+
         <div class="dashboard-grid">
             <div class="card">
                 <h2>Add Website</h2>
                 <form action="/add-website" method="POST">
                     <div class="form-group">
                         <label>Website Name</label>
-                        <input type="text" name="name" placeholder="e.g. Google" required>
+                        <input type="text" name="name" placeholder="Google" required>
                     </div>
                     <div class="form-group">
                         <label>Website URL</label>
@@ -254,10 +312,7 @@
             </div>
 
             <div class="card">
-                <div class="table-header">
-                    <h2>Monitored Websites</h2>
-                    <button class="btn-refresh" onclick="location.reload()">Refresh</button>
-                </div>
+                <h2>Monitored Websites (<%= websites.length %>)</h2>
                 <table>
                     <thead>
                         <tr>
@@ -268,41 +323,85 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <% if (typeof websites !== 'undefined' && websites.length > 0) { %>
+                        <% if (websites.length === 0) { %>
+                            <tr><td colspan="4" style="text-align: center; color: #64748b;">ಯಾವುದೇ ವೆಬ್‌ಸೈಟ್ ಸೇರಿಸಲಾಗಿಲ್ಲ</td></tr>
+                        <% } else { %>
                             <% websites.forEach(function(site) { %>
                                 <tr>
                                     <td>
-                                        <div class="site-name"><%= site.name %></div>
-                                        <div class="site-url"><%= site.url %></div>
+                                        <strong><%= site.name %></strong><br>
+                                        <span style="font-size: 12px; color: #64748b;"><%= site.url %></span>
                                     </td>
                                     <td>
                                         <span class="badge-status <%= site.status === 'UP' ? 'badge-up' : (site.status === 'DOWN' ? 'badge-down' : 'badge-pending') %>">
-                                            <%= site.status || 'PENDING' %>
+                                            <%= site.status %>
                                         </span>
                                     </td>
-                                    <td style="color: #94a3b8; font-size: 13px;"><%= site.lastChecked || 'Waiting...' %></td>
+                                    <td style="color: #94a3b8; font-size: 13px;"><%= site.lastChecked %></td>
                                     <td>
-                                        <form action="/delete-website/<%= site.id %>" method="POST" style="display:inline;">
+                                        <form action="/delete-website/<%= site.id %>" method="POST">
                                             <button type="submit" class="btn-delete">Delete</button>
                                         </form>
                                     </td>
                                 </tr>
                             <% }); %>
-                        <% } else { %>
-                            <tr>
-                                <td>
-                                    <div class="site-name">PingBaba</div>
-                                    <div class="site-url">https://example.com</div>
-                                </td>
-                                <td><span class="badge-status badge-pending">PENDING</span></td>
-                                <td style="color: #94a3b8; font-size: 13px;">Waiting...</td>
-                                <td><button class="btn-delete">Delete</button></td>
-                            </tr>
                         <% } %>
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
+
+    <script>
+        async function initiatePayment(planId) {
+            try {
+                const res = await fetch('/api/create-order', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ planId })
+                });
+                const orderData = await res.json();
+
+                if (!orderData.success) {
+                    alert('ಆರ್ಡರ್ ಆರಂಭಿಸಲು ವಿಫಲವಾಗಿದೆ: ' + orderData.message);
+                    return;
+                }
+
+                const options = {
+                    key: orderData.keyId,
+                    amount: orderData.amount,
+                    currency: "INR",
+                    name: "Pingbaba",
+                    description: orderData.planName + " Plan Subscription",
+                    order_id: orderData.orderId,
+                    handler: async function (response) {
+                        const verifyRes = await fetch('/api/verify-payment', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                razorpay_order_id: response.razorpay_order_id,
+                                razorpay_payment_id: response.razorpay_payment_id,
+                                razorpay_signature: response.razorpay_signature,
+                                planId: planId
+                            })
+                        });
+                        const verifyData = await verifyRes.json();
+                        if (verifyData.success) {
+                            alert(verifyData.message);
+                            location.reload();
+                        } else {
+                            alert('ದೃಢೀಕರಣ ವಿಫಲವಾಗಿದೆ: ' + verifyData.message);
+                        }
+                    },
+                    theme: { color: "#2563eb" }
+                };
+
+                const rzp = new Razorpay(options);
+                rzp.open();
+            } catch (err) {
+                alert('ಪೇಮೆಂಟ್ ಗೇಟ್‌ವೇ ಸಂಪರ್ಕಿಸಲು ಸಾಧ್ಯವಾಗುತ್ತಿಲ್ಲ.');
+            }
+        }
+    </script>
 </body>
 </html>
