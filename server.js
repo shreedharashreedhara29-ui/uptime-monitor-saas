@@ -7,6 +7,7 @@ const Razorpay = require('razorpay');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Keys
 const RAZORPAY_KEY_ID = process.env.RAZORPAY_KEY_ID || 'rzp_test_TvxlEIhwKn8b3d';
 const RAZORPAY_KEY_SECRET = process.env.RAZORPAY_KEY_SECRET || 'NZ354nNhWxA88CamPBfUx7Tc';
 const FAST2SMS_API_KEY = process.env.FAST2SMS_API_KEY || 'wAqANnU9F5SnTiOFzFDem4RtDNY41dXnCnSZh7YdOX8SMHctsY3Xql8xv2ZzATI9jCKEWjlUD36o01Jc';
@@ -33,7 +34,7 @@ app.use(express.urlencoded({ extended: true }));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-// Fast2SMS OTP Route ಮೂಲಕ ಭಾರತೀಯ ಮೊಬೈಲ್‌ಗೆ ತಕ್ಷಣ SMS ಕಳುಹಿಸುವ ಫಂಕ್ಷನ್
+// Fast2SMS ಮೂಲಕ ಭಾರತೀಯ ಮೊಬೈಲ್‌ಗೆ ನೇರ SMS ಕಳುಹಿಸುವ ಫಂಕ್ಷನ್
 async function sendSmsAlert(rawPhone, siteName) {
     try {
         let cleanPhone = rawPhone.toString().replace(/[^0-9]/g, '');
@@ -46,9 +47,9 @@ async function sendSmsAlert(rawPhone, siteName) {
             return;
         }
 
-        console.log(`[Fast2SMS ಕಳುಹಿಸಲಾಗುತ್ತಿದೆ...] ನಂಬರ್: ${cleanPhone}`);
+        console.log(`[Fast2SMS ಕಳುಹಿಸಲಾಗುತ್ತಿದೆ...] ಮೊಬೈಲ್ ನಂಬರ್: ${cleanPhone}`);
 
-        // OTP ರೂಟ್ - ಇದು DND ಮತ್ತು DLT ನಿಯಮಗಳನ್ನು ಮೀರಿ ತಕ್ಷಣ ತಲುಪುತ್ತದೆ
+        // DLT ನಿರ್ಬಂಧವಿಲ್ಲದ Fast2SMS OTP Route
         const response = await axios.get('https://www.fast2sms.com/dev/bulkV2', {
             params: {
                 authorization: FAST2SMS_API_KEY,
@@ -59,13 +60,13 @@ async function sendSmsAlert(rawPhone, siteName) {
             timeout: 10000
         });
 
-        console.log('Fast2SMS ಯಶಸ್ವಿ ರಿಸಲ್ಟ್:', response.data);
+        console.log('Fast2SMS ಯಶಸ್ವಿ ವರದಿ:', response.data);
     } catch (err) {
-        console.error('Fast2SMS ದೋಷ:', err.response ? err.response.data : err.message);
+        console.error('Fast2SMS ಕಳುಹಿಸುವಲ್ಲಿ ದೋಷ:', err.response ? err.response.data : err.message);
     }
 }
 
-// ನೈಜ HTTP ವೆಬ್‌ಸೈಟ್ ಚೆಕರ್
+// ವೆಬ್‌ಸೈಟ್ ಲೈವ್ ತಪಾಸಣೆ
 async function verifyWebsiteLive(targetUrl) {
     let formattedUrl = targetUrl.trim();
     if (!formattedUrl.startsWith('http://') && !formattedUrl.startsWith('https://')) {
@@ -75,7 +76,7 @@ async function verifyWebsiteLive(targetUrl) {
     try {
         await axios.get(formattedUrl, {
             timeout: 5000,
-            headers: { 'User-Agent': 'Pingbaba-Uptime-Bot/4.0' },
+            headers: { 'User-Agent': 'Pingbaba-Uptime-Bot/5.0' },
             validateStatus: (status) => status >= 200 && status < 400
         });
         return { isUp: true, finalUrl: formattedUrl };
@@ -93,29 +94,36 @@ app.get('/', (req, res) => {
     });
 });
 
+// ಸೈಟ್ ಸೇರಿಸುವ ಹಂತ - SMS ಪೂರ್ಣ ಕಳುಹಿಸಿದ ನಂತರವೇ ಪೇಜ್ ರಿಫ್ರೆಶ್ ಆಗುತ್ತದೆ
 app.post('/add-website', async (req, res) => {
-    const { name, url, phone, email } = req.body;
+    try {
+        const { name, url, phone, email } = req.body;
 
-    const checkResult = await verifyWebsiteLive(url);
+        const checkResult = await verifyWebsiteLive(url);
 
-    const newSite = {
-        id: Date.now().toString(),
-        name: name.trim(),
-        url: checkResult.finalUrl,
-        phone: phone ? phone.trim() : '',
-        email: email ? email.trim() : '',
-        status: checkResult.isUp ? 'UP' : 'DOWN',
-        lastChecked: new Date().toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata' })
-    };
+        const newSite = {
+            id: Date.now().toString(),
+            name: name ? name.trim() : 'Website',
+            url: checkResult.finalUrl,
+            phone: phone ? phone.trim() : '',
+            email: email ? email.trim() : '',
+            status: checkResult.isUp ? 'UP' : 'DOWN',
+            lastChecked: new Date().toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata' })
+        };
 
-    globalState.websites.push(newSite);
+        globalState.websites.push(newSite);
 
-    // ಸೈಟ್ DOWN ಆಗಿದ್ದರೆ ತಕ್ಷಣವೇ OTP Route SMS ರವಾನೆ
-    if (!checkResult.isUp && newSite.phone) {
-        await sendSmsAlert(newSite.phone, newSite.name);
+        // ಸೈಟ್ DOWN ಆಗಿದ್ದರೆ ತಕ್ಷಣವೇ SMS ರವಾನೆ
+        if (!checkResult.isUp && newSite.phone) {
+            console.log('DOWN ಸೈಟ್ ಪತ್ತೆ, SMS ಪ್ರಕ್ರಿಯೆ ಆರಂಭ...');
+            await sendSmsAlert(newSite.phone, newSite.name);
+        }
+
+        res.redirect('/');
+    } catch (err) {
+        console.error('Add website error:', err);
+        res.redirect('/');
     }
-
-    res.redirect('/');
 });
 
 app.post('/delete-website/:id', (req, res) => {
@@ -171,6 +179,22 @@ app.post('/api/verify-payment', (req, res) => {
         res.status(500).json({ success: false, message: 'Verification Error' });
     }
 });
+
+// ಬ್ಯಾಕ್‌ಗ್ರೌಂಡ್ ಮಾನಿಟರಿಂಗ್
+setInterval(async () => {
+    if (!globalState.websites || globalState.websites.length === 0) return;
+
+    for (let site of globalState.websites) {
+        const prevStatus = site.status;
+        const checkResult = await verifyWebsiteLive(site.url);
+        site.status = checkResult.isUp ? 'UP' : 'DOWN';
+        site.lastChecked = new Date().toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata' });
+
+        if (prevStatus === 'UP' && site.status === 'DOWN' && site.phone) {
+            await sendSmsAlert(site.phone, site.name);
+        }
+    }
+}, 20000);
 
 if (process.env.NODE_ENV !== 'production') {
     app.listen(PORT, () => console.log(`Running on port ${PORT}`));
