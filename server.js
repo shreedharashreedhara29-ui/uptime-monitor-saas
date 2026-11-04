@@ -25,7 +25,7 @@ const PLANS = {
 
 let globalState = {
     websites: [],
-    userPlan: 'pro' // ಟೆಸ್ಟಿಂಗ್ ಮುಗಿಯುವವರೆಗೆ Pro ನಲ್ಲೇ ಇರುತ್ತದೆ
+    userPlan: 'pro'
 };
 
 app.use(express.json());
@@ -33,11 +33,10 @@ app.use(express.urlencoded({ extended: true }));
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-// Fast2SMS ಮೂಲಕ ಭಾರತೀಯ ನಂಬರ್‌ಗೆ ನೇರ SMS ಕಳುಹಿಸುವ ಫಂಕ್ಷನ್
-async function sendSmsAlert(rawPhone, siteName, statusText) {
+// Fast2SMS OTP Route ಮೂಲಕ ಭಾರತೀಯ ಮೊಬೈಲ್‌ಗೆ ತಕ್ಷಣ SMS ಕಳುಹಿಸುವ ಫಂಕ್ಷನ್
+async function sendSmsAlert(rawPhone, siteName) {
     try {
         let cleanPhone = rawPhone.toString().replace(/[^0-9]/g, '');
-        // 91 ತೆಗೆದು ಕೊನೆಯ 10 ಅಂಕಿಗಳನ್ನು ಮಾತ್ರ ತೆಗೆದುಕೊಳ್ಳಿ
         if (cleanPhone.length > 10) {
             cleanPhone = cleanPhone.slice(-10);
         }
@@ -47,32 +46,26 @@ async function sendSmsAlert(rawPhone, siteName, statusText) {
             return;
         }
 
-        console.log(`[SMS ಕಳುಹಿಸಲಾಗುತ್ತಿದೆ...] ಸಂಖ್ಯೆ: ${cleanPhone}`);
+        console.log(`[Fast2SMS ಕಳುಹಿಸಲಾಗುತ್ತಿದೆ...] ನಂಬರ್: ${cleanPhone}`);
 
-        // Fast2SMS Quick Message API
-        const payload = {
-            route: "q",
-            message: `Pingbaba Alert: Your website ${siteName} is ${statusText}! Check dashboard immediately.`,
-            language: "english",
-            flash: 0,
-            numbers: cleanPhone
-        };
-
-        const res = await axios.post('https://www.fast2sms.com/dev/bulkV2', payload, {
-            headers: {
-                "authorization": FAST2SMS_API_KEY,
-                "Content-Type": "application/json"
+        // OTP ರೂಟ್ - ಇದು DND ಮತ್ತು DLT ನಿಯಮಗಳನ್ನು ಮೀರಿ ತಕ್ಷಣ ತಲುಪುತ್ತದೆ
+        const response = await axios.get('https://www.fast2sms.com/dev/bulkV2', {
+            params: {
+                authorization: FAST2SMS_API_KEY,
+                variables_values: "DOWN",
+                route: "otp",
+                numbers: cleanPhone
             },
             timeout: 10000
         });
 
-        console.log('Fast2SMS ಯಶಸ್ವಿ ವರದಿ:', res.data);
+        console.log('Fast2SMS ಯಶಸ್ವಿ ರಿಸಲ್ಟ್:', response.data);
     } catch (err) {
-        console.error('Fast2SMS ಕಳುಹಿಸುವಾಗ ದೋಷ:', err.response ? err.response.data : err.message);
+        console.error('Fast2SMS ದೋಷ:', err.response ? err.response.data : err.message);
     }
 }
 
-// ವೆಬ್‌ಸೈಟ್ ಲೈವ್ ತಪಾಸಣೆ (Live Checker)
+// ನೈಜ HTTP ವೆಬ್‌ಸೈಟ್ ಚೆಕರ್
 async function verifyWebsiteLive(targetUrl) {
     let formattedUrl = targetUrl.trim();
     if (!formattedUrl.startsWith('http://') && !formattedUrl.startsWith('https://')) {
@@ -81,8 +74,8 @@ async function verifyWebsiteLive(targetUrl) {
 
     try {
         await axios.get(formattedUrl, {
-            timeout: 6000,
-            headers: { 'User-Agent': 'Pingbaba-Uptime-Bot/3.0' },
+            timeout: 5000,
+            headers: { 'User-Agent': 'Pingbaba-Uptime-Bot/4.0' },
             validateStatus: (status) => status >= 200 && status < 400
         });
         return { isUp: true, finalUrl: formattedUrl };
@@ -117,9 +110,9 @@ app.post('/add-website', async (req, res) => {
 
     globalState.websites.push(newSite);
 
-    // ಸೈಟ್ DOWN ಆಗಿದ್ದರೆ ತಕ್ಷಣವೇ SMS ರವಾನೆ!
+    // ಸೈಟ್ DOWN ಆಗಿದ್ದರೆ ತಕ್ಷಣವೇ OTP Route SMS ರವಾನೆ
     if (!checkResult.isUp && newSite.phone) {
-        await sendSmsAlert(newSite.phone, newSite.name, 'DOWN');
+        await sendSmsAlert(newSite.phone, newSite.name);
     }
 
     res.redirect('/');
@@ -130,22 +123,54 @@ app.post('/delete-website/:id', (req, res) => {
     res.redirect('/');
 });
 
-// ಕಾಲಕಾಲಕ್ಕೆ ಸೈಟ್‌ಗಳನ್ನು ಚೆಕ್ ಮಾಡುವ ಪ್ರಕ್ರಿಯೆ
-setInterval(async () => {
-    if (!globalState.websites || globalState.websites.length === 0) return;
+app.post('/api/create-order', async (req, res) => {
+    try {
+        const { planId } = req.body;
+        const plan = PLANS[planId];
 
-    for (let site of globalState.websites) {
-        const prevStatus = site.status;
-        const checkResult = await verifyWebsiteLive(site.url);
-        site.status = checkResult.isUp ? 'UP' : 'DOWN';
-        site.lastChecked = new Date().toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata' });
-
-        // UP ಇದ್ದದ್ದು DOWN ಆದರೆ SMS ಕಳುಹಿಸು
-        if (prevStatus === 'UP' && site.status === 'DOWN') {
-            await sendSmsAlert(site.phone, site.name, 'DOWN');
+        if (!plan || plan.price === 0) {
+            return res.status(400).json({ success: false, message: 'Invalid plan' });
         }
+
+        const options = {
+            amount: plan.price * 100,
+            currency: 'INR',
+            receipt: `rcpt_${Date.now()}`
+        };
+
+        const order = await razorpay.orders.create(options);
+        res.json({
+            success: true,
+            orderId: order.id,
+            amount: order.amount,
+            planName: plan.name,
+            keyId: RAZORPAY_KEY_ID
+        });
+    } catch (err) {
+        res.status(500).json({ success: false, message: 'Order Creation Failed' });
     }
-}, 20000);
+});
+
+app.post('/api/verify-payment', (req, res) => {
+    try {
+        const { razorpay_order_id, razorpay_payment_id, razorpay_signature, planId } = req.body;
+
+        const body = razorpay_order_id + "|" + razorpay_payment_id;
+        const expectedSignature = crypto
+            .createHmac('sha256', RAZORPAY_KEY_SECRET)
+            .update(body.toString())
+            .digest('hex');
+
+        if (expectedSignature === razorpay_signature) {
+            globalState.userPlan = planId;
+            return res.json({ success: true, message: `ಪಾವತಿ ಯಶಸ್ವಿಯಾಗಿದೆ! ${PLANS[planId].name} ಪ್ಲಾನ್ ಸಕ್ರಿಯಗೊಂಡಿದೆ.` });
+        } else {
+            return res.status(400).json({ success: false, message: 'Payment verification failed' });
+        }
+    } catch (err) {
+        res.status(500).json({ success: false, message: 'Verification Error' });
+    }
+});
 
 if (process.env.NODE_ENV !== 'production') {
     app.listen(PORT, () => console.log(`Running on port ${PORT}`));
